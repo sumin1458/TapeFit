@@ -42,10 +42,19 @@ class TapeFitApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp.router(
-      title: '테이프핏',
+      title: 'TapeFit',
       debugShowCheckedModeBanner: false,
       theme: buildTheme(),
       routerConfig: appRouter,
+      builder: (context, child) => ColoredBox(
+        color: const Color(0xFFE9EEFA),
+        child: Center(
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 480),
+            child: child,
+          ),
+        ),
+      ),
     );
   }
 }
