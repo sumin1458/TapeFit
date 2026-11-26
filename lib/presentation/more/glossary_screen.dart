@@ -49,13 +49,10 @@ class _GlossaryScreenState extends State<GlossaryScreen> {
                 title: Text('${t.term}  (${t.english})'),
                 subtitle: Padding(
                   padding: const EdgeInsets.only(top: 4),
-                  child: Text('${t.meaning}\n출처: ${t.sources.join(', ')}'),
+                  child: Text(t.meaning),
                 ),
               ),
             ),
-          const Divider(height: 32),
-          Text('출처', style: Theme.of(context).textTheme.titleSmall),
-          for (final s in knowledgeSources) Text('${s.id} · ${s.title}', style: Theme.of(context).textTheme.bodySmall),
         ],
       ),
     );

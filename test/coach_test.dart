@@ -92,7 +92,7 @@ void main() {
       child: MaterialApp.router(routerConfig: appRouter),
     ));
     await tester.pumpAndSettle();
-    appRouter.go('/ai');
+    appRouter.go('/ai-preview');
     await tester.pumpAndSettle();
 
     expect(find.byKey(const ValueKey('fake-cam')), findsNothing);

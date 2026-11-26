@@ -12,7 +12,7 @@ class TapeIntroScreen extends StatelessWidget {
     final t = Theme.of(context).textTheme;
     return Scaffold(
       appBar: AppBar(title: const Text('테이핑 소개')),
-      bottomNavigationBar: const TapeFitNavBar(index: 4),
+      bottomNavigationBar: const TapeFitNavBar(index: 3),
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: [
@@ -29,8 +29,6 @@ class TapeIntroScreen extends StatelessWidget {
                     Text(x.kind, style: t.bodySmall),
                     const SizedBox(height: 6),
                     for (final p in x.points) Text('• $p'),
-                    const SizedBox(height: 6),
-                    Text('출처: ${x.sources.join(', ')}', style: t.bodySmall),
                   ],
                 ),
               ),
@@ -43,15 +41,12 @@ class TapeIntroScreen extends StatelessWidget {
             Card(
               child: ListTile(
                 title: Text(s.name),
-                subtitle: Text('모양: ${s.cut}\n${s.use}\n출처: ${s.sources.join(', ')}'),
+                subtitle: Text('모양: ${s.cut}\n${s.use}'),
                 isThreeLine: true,
               ),
             ),
           Text(stripNote, style: t.bodySmall),
           const Divider(height: 32),
-          Text('출처 목록', style: t.titleSmall),
-          for (final s in knowledgeSources) Text('${s.id} · ${s.title}', style: t.bodySmall),
-          const SizedBox(height: 8),
           Text('교육용 정보이며 의료 행위를 대체하지 않아요. 전문가 검수는 아직 받지 않았어요.', style: t.bodySmall),
         ],
       ),

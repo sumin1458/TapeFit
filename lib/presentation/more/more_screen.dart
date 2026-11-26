@@ -14,7 +14,7 @@ class MoreScreen extends ConsumerWidget {
     final catalog = ref.watch(catalogProvider).value;
     return Scaffold(
       appBar: AppBar(title: const Text('더보기')),
-      bottomNavigationBar: const TapeFitNavBar(index: 3),
+      bottomNavigationBar: const TapeFitNavBar(index: 4),
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: [
