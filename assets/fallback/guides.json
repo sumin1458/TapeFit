@@ -20,7 +20,7 @@
       "tapeNeeded": "리지드 테이프, 언더랩, 가위",
       "sources": ["S3", "S5", "S6"],
       "published": true,
-      "review": { "status": "pending", "reviewer": "송수민", "reviewedAt": null },
+      "review": { "status": "pending", "reviewer": "미정", "reviewedAt": null },
       "steps": [
         {
           "order": 1,
@@ -77,7 +77,7 @@
     { "id": "S1", "type": "학술", "title": "Kinesio Taping 급성 발목 염좌 체계적 문헌고찰, Journal of Clinical Medicine 2025, 14(5), 1440", "url": "https://www.mdpi.com/2077-0383/14/5/1440" },
     { "id": "S2", "type": "학술", "title": "Is Kinesio taping an effective approach for acute ankle sprains? A systematic review and meta-analysis (2026)", "url": "https://www.sciencedirect.com/org/science/article/pii/S2058524126000332" },
     { "id": "S3", "type": "의료기관", "title": "서울대학교병원 의학정보 \"테이핑 요법\"", "url": "https://www.snuh.org/health/nMedInfo/nView.do?medid=BB000097" },
-    { "id": "S4", "type": "콘텐츠 검수", "title": "팀원 송수민 (스포츠테이핑 자격증)", "url": "" },
+    { "id": "S4", "type": "콘텐츠 검수", "title": "팀 내부 콘텐츠 검수 (전문가 검수 예정)", "url": "" },
     { "id": "S5", "type": "교육 자료", "title": "Athletic Therapy Skills, \"Ankle Inversion and Eversion\"", "url": "https://pressbooks.openedmb.ca/athletictherapy/chapter/ankle-inversion-and-eversion/" },
     { "id": "S6", "type": "의료기관", "title": "서울대학교병원 의학정보 \"발목염좌\"", "url": "https://www.snuh.org/health/nMedInfo/nView.do?medid=AA000550" }
   ]

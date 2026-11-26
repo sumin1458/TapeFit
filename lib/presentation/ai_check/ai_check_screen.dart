@@ -5,11 +5,12 @@ import '../../app/nav_bar.dart';
 import '../../application/guide_providers.dart';
 import '../../domain/coach_rules.dart';
 import '../../domain/guide_models.dart';
+import '../../domain/tape_analyzer.dart';
 import 'camera_feed.dart';
 
 /// AI검사 탭: 카메라 화면 위에 단계별 테이프 가이드선을 겹쳐 보여 주고,
-/// 점검 질문에 답하면 가이드와 다른 점의 수정 방법을 알려 주는 코치.
-/// 사진을 분석하는 AI가 아니라 규칙 기반 점검이며, 영상은 저장·전송하지 않는다.
+/// 가상 AI 코치가 화면을 기기 안에서 분석해 붙인 위치가 맞는지 알려 준다.
+/// 키·로그인 없이 동작하며 영상은 저장·전송하지 않는다. 구김·당김 세기는 볼 수 없어 직접 점검을 함께 둔다.
 class AiCheckScreen extends ConsumerStatefulWidget {
   const AiCheckScreen({super.key});
 
@@ -22,12 +23,49 @@ class _AiCheckScreenState extends ConsumerState<AiCheckScreen> {
   bool _cameraOn = false;
   final Map<int, bool> _answers = {};
   bool _checked = false;
+  final _grabber = FrameGrabber();
+  AiCoachResult? _ai;
+  bool _analyzing = false;
+  String? _aiError;
 
   void _selectStep(int i) => setState(() {
         _step = i;
         _answers.clear();
         _checked = false;
+        _ai = null;
+        _aiError = null;
       });
+
+  Future<void> _askAi(TapeStep step) async {
+    final grab = _grabber.grab;
+    if (grab == null) {
+      setState(() => _aiError = '카메라가 아직 준비되지 않았어요. 잠시 후 다시 눌러 주세요.');
+      return;
+    }
+    setState(() {
+      _analyzing = true;
+      _aiError = null;
+    });
+    try {
+      final frame = await grab();
+      if (!mounted) return;
+      setState(() {
+        _analyzing = false;
+        if (frame == null) {
+          _aiError = '화면을 가져오지 못했어요. 다시 시도해 주세요.';
+        } else {
+          _ai = analyzeTape(frame: frame, guide: step.tape);
+        }
+      });
+    } catch (_) {
+      if (mounted) {
+        setState(() {
+          _analyzing = false;
+          _aiError = '분석 중 문제가 생겼어요. 다시 시도해 주세요.';
+        });
+      }
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -57,9 +95,10 @@ class _AiCheckScreenState extends ConsumerState<AiCheckScreen> {
           child: Padding(
             padding: EdgeInsets.all(12),
             child: Text(
-              'AI 코치 (규칙 기반)\n'
-              '카메라 화면에 가이드선을 겹쳐 보며 붙인 위치를 맞춰 보고, 아래 점검에 답하면 '
-              '가이드와 다른 점을 알려 줘요. 사진을 분석하는 AI는 아니며, 영상은 저장하거나 전송하지 않아요.',
+              'AI 코치 (기기 안 가상 AI)\n'
+              '로그인·API 키 없이 기기 안에서만 분석해요. 카메라 화면의 가이드선에 붙인 테이프가 '
+              '얼마나 겹치는지 색 차이로 보고 알려 줘요. 구김이나 당기는 세기는 볼 수 없어서 '
+              '아래 직접 점검도 함께 해 주세요. 영상은 저장하거나 전송하지 않아요.',
               style: TextStyle(fontSize: 13, height: 1.4),
             ),
           ),
@@ -87,8 +126,25 @@ class _AiCheckScreenState extends ConsumerState<AiCheckScreen> {
               : '화면의 가이드선에 붙인 테이프를 맞춰 보세요. 위치 참고용이에요.',
           style: Theme.of(context).textTheme.bodySmall,
         ),
+        const SizedBox(height: 10),
+        FilledButton.icon(
+          key: const ValueKey('ask-ai'),
+          icon: _analyzing
+              ? const SizedBox(width: 16, height: 16, child: CircularProgressIndicator(strokeWidth: 2))
+              : const Icon(Icons.auto_awesome),
+          label: Text(_analyzing ? '분석 중…' : 'AI 코치에게 물어보기'),
+          onPressed: _cameraOn && !_analyzing ? () => _askAi(step) : null,
+        ),
+        if (!_cameraOn)
+          Padding(
+            padding: const EdgeInsets.only(top: 4),
+            child: Text('카메라를 켜고 다리를 가이드선에 맞춘 뒤 눌러 주세요.', style: Theme.of(context).textTheme.bodySmall),
+          ),
+        if (_aiError != null)
+          Padding(padding: const EdgeInsets.only(top: 8), child: Text(_aiError!, style: const TextStyle(color: Colors.red))),
+        if (_ai != null) ...[const SizedBox(height: 8), _aiCard(_ai!)],
         const Divider(height: 28),
-        Text('${step.title} 점검', style: Theme.of(context).textTheme.titleMedium),
+        Text('${step.title} 직접 점검', style: Theme.of(context).textTheme.titleMedium),
         const SizedBox(height: 8),
         for (var i = 0; i < items.length; i++) _question(i, items[i]),
         const SizedBox(height: 8),
@@ -122,7 +178,7 @@ class _AiCheckScreenState extends ConsumerState<AiCheckScreen> {
                   ),
                 )
               : Stack(fit: StackFit.expand, children: [
-                  ref.watch(cameraFeedBuilderProvider)(context),
+                  ref.watch(cameraFeedBuilderProvider)(context, _grabber),
                   IgnorePointer(
                     child: CustomPaint(
                       key: const ValueKey('guide-overlay'),
@@ -135,11 +191,38 @@ class _AiCheckScreenState extends ConsumerState<AiCheckScreen> {
                     child: IconButton.filledTonal(
                       tooltip: '카메라 끄기',
                       icon: const Icon(Icons.videocam_off),
-                      onPressed: () => setState(() => _cameraOn = false),
+                      onPressed: () => setState(() {
+                        _cameraOn = false;
+                        _ai = null;
+                      }),
                     ),
                   ),
                 ]),
         ),
+      ),
+    );
+  }
+
+  Widget _aiCard(AiCoachResult r) {
+    final (color, icon) = switch (r.level) {
+      CoachLevel.good => (Colors.green.shade50, Icons.check_circle),
+      CoachLevel.partial => (Colors.orange.shade50, Icons.tips_and_updates),
+      _ => (Colors.red.shade50, Icons.error_outline),
+    };
+    return Card(
+      key: const ValueKey('ai-result'),
+      color: color,
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+          Row(children: [
+            Icon(icon),
+            const SizedBox(width: 8),
+            Expanded(child: Text(r.headline, style: Theme.of(context).textTheme.titleMedium)),
+          ]),
+          const SizedBox(height: 8),
+          for (final t in r.tips) Padding(padding: const EdgeInsets.symmetric(vertical: 3), child: Text('• $t')),
+        ]),
       ),
     );
   }
@@ -213,10 +296,9 @@ class _GuidePainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
     if (step.tape.isEmpty) return;
-    const w = 210.0, h = 230.0;
-    final k = size.shortestSide / h * 0.9;
-    canvas.translate((size.width - w * k) / 2, (size.height - h * k) / 2);
-    canvas.scale(k);
+    final k = GuideFit(size.width, size.height);
+    canvas.translate(k.dx, k.dy);
+    canvas.scale(k.k);
     final halo = Paint()
       ..color = Colors.white.withValues(alpha: 0.85)
       ..style = PaintingStyle.stroke

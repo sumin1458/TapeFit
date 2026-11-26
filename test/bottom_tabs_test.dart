@@ -26,7 +26,7 @@ void main() {
 
     await tester.tap(find.text('AI검사'));
     await tester.pumpAndSettle();
-    expect(find.textContaining('AI 코치 (규칙 기반)'), findsOneWidget);
+    expect(find.textContaining('AI 코치 (기기 안 가상 AI)'), findsOneWidget);
 
     await tester.tap(find.text('더보기'));
     await tester.pumpAndSettle();

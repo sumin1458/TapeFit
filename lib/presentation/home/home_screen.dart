@@ -69,6 +69,7 @@ class HomeScreen extends ConsumerWidget {
                 childAspectRatio: 1.35,
                 children: [
                   for (final p in c.bodyParts) _PartTile(part: p),
+                  for (final k in _concerns) _ConcernTile(emoji: k.$1, label: k.$2),
                 ],
               ),
               const SizedBox(height: 20),
@@ -172,6 +173,31 @@ class _HeroCard extends StatelessWidget {
             ),
           ]),
         ),
+      ),
+    );
+  }
+}
+
+const _concerns = [('💧', '부종'), ('🫧', '림프'), ('🧵', '근막')];
+
+/// 증상별 항목. 아직 가이드가 없어 준비 중으로 표시한다.
+class _ConcernTile extends StatelessWidget {
+  const _ConcernTile({required this.emoji, required this.label});
+  final String emoji;
+  final String label;
+
+  @override
+  Widget build(BuildContext context) {
+    return Card(
+      margin: EdgeInsets.zero,
+      child: Padding(
+        padding: const EdgeInsets.all(14),
+        child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
+          CircleAvatar(backgroundColor: Colors.grey.shade200, child: Text(emoji, style: const TextStyle(fontSize: 22))),
+          const SizedBox(height: 8),
+          Text(label, style: const TextStyle(fontWeight: FontWeight.w700)),
+          const Text('준비 중이에요', style: TextStyle(fontSize: 12, color: Colors.black54)),
+        ]),
       ),
     );
   }

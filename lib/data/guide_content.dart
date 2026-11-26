@@ -53,7 +53,7 @@ const Map<String, dynamic> bundledGuideContent = {
       'published': true,
       'review': {
         'status': 'pending',
-        'reviewer': '송수민',
+        'reviewer': '미정',
         'reviewedAt': null,
       },
       'steps': [
@@ -179,7 +179,7 @@ const Map<String, dynamic> bundledGuideContent = {
     {
       'id': 'S4',
       'type': '콘텐츠 검수',
-      'title': '팀원 송수민 (스포츠테이핑 자격증)',
+      'title': '팀 내부 콘텐츠 검수 (전문가 검수 예정)',
       'url': '',
     },
     {

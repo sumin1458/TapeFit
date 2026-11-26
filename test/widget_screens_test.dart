@@ -72,5 +72,8 @@ void main() {
 
     expect(find.textContaining('의학적 진단·치료를 대체하지 않습니다'), findsOneWidget);
     expect(find.text('준비 중이에요'), findsWidgets);
+    for (final t in ['부종', '림프', '근막']) {
+      expect(find.text(t), findsOneWidget);
+    }
   });
 }
