@@ -9,9 +9,36 @@
 /// flutter run -d chrome                         # 웹 실행 (Flutter 3.50.1 / Dart 3.14)
 /// node tool/validate_content.mjs                # 콘텐츠 검증
 /// node --test tool/validate_content.test.mjs    # Node 검증 테스트 19건
-/// flutter analyze                               # 오류 0건 (안내 16건, 모두 material.dart 사용 중단 안내)
-/// flutter test                                  # 41건 통과 (2026-11-27, TRD 8.1)
+/// flutter analyze                               # 오류 0건 (안내 17건, 모두 material.dart 사용 중단 안내)
+/// flutter test                                  # 42건 통과 (TRD 8.1)
+/// flutter build web --release                   # 웹 빌드 (build/web, 정적 서버로 시연)
 /// ```
+/// 실행 결과(실제 측정): flutter test 42/42 통과, node --test 19/19 통과,
+/// flutter analyze 오류 0건. 배포 주소는 아직 없다(Firebase Hosting 미배포).
+///
+/// ## 테스트가 읽는 파일 (모두 저장소에 있음)
+/// - `content/guides.json`: 가이드 콘텐츠 원본 (T-35, T-49가 읽음)
+/// - `assets/fallback/guides.json`: 앱 번들 사본
+/// - `test/fixtures/invalid_cases.json`: 잘못된 데이터 18건과 기대 오류 코드 (T-25)
+/// - `firestore.rules`: 보안 규칙 원본 (T-41)
+///
+/// ## 시연 시나리오 (T-49가 자동으로 같은 흐름을 검증)
+/// 1. 홈에서 "발목 불안정감" 선택 → 2. 안전 체크 4항목 (하나라도 체크하면 진료 권고,
+/// 진행 차단) → 3. "해당 없어요, 시작할게요" → 4. 5단계를 다음 버튼으로 이동
+/// → 5. 완료 화면 → 6. "처음으로"로 홈 복귀.
+///
+/// ## 요구사항 대응 (PRD/TRD 3장 → 코드 → 테스트)
+/// - FR-01·02 안전 체크: `presentation/safety/safety_check_screen.dart`, T-31, T-49
+/// - FR-03 5단계 이동: `presentation/guide/step_guide_screen.dart`, T-32, T-49
+/// - FR-04 완료 화면: `presentation/complete/complete_screen.dart`, T-49
+/// - FR-05 즐겨찾기 유지: `data/favorite_repository.dart`, T-38, T-39, T-46, T-47
+/// - FR-06 출처·검수 표시: `presentation/guide/`, T-33, T-34
+/// - FR-07 면책 문구: `more_screen.dart`, 콘텐츠 disclaimer, T-48
+/// - FR-08 잘못된 가이드 차단: `core/validation.dart`, T-25
+/// - FR-09 보수적 문구·검수 전 표시: `guides.json`, T-35~T-37
+/// - NFR-01 오프라인 동작: `data/fallback_guide_source.dart`, T-42~T-45
+/// - NFR-06 읽기 전용 앱: `firestore.rules`, T-41
+/// - 미구현(범위 제외): FR-10 점검 화면, FR-11 이벤트 기록
 ///
 /// ## 콘텐츠 (`lib/data/guide_content.dart` = `content/guides.json` = `assets/fallback/guides.json`)
 /// 앱은 `guide_content.dart` 상수를 번들 폴백으로 쓰고, 세 파일의 일치는 T-35가 검사한다.
