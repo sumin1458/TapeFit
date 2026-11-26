@@ -2,6 +2,16 @@
 
 초보자를 위한 단계별 테이핑 가이드 앱 (Flutter + Firebase). 요구사항은 `docs/PRD.md`, 설계는 `docs/TRD.md`.
 
+## 심사 참고 파일 (코드 외)
+
+| 구분 | 파일 |
+|---|---|
+| 요구사항 (PRD) | [docs/PRD.md](docs/PRD.md) |
+| 기술 설계·테스트 결과 (TRD) | [docs/TRD.md](docs/TRD.md) |
+| 콘텐츠 데이터 (5단계·출처·검수 상태) | [content/guides.json](content/guides.json), [assets/fallback/guides.json](assets/fallback/guides.json) |
+| 검증 규칙 테스트 데이터 | [test/fixtures/invalid_cases.json](test/fixtures/invalid_cases.json) |
+| 테스트 코드 | [test/](test/), [tool/validate_content.test.mjs](tool/validate_content.test.mjs) |
+| 의존성·설정 | [pubspec.yaml](pubspec.yaml), [firestore.rules](firestore.rules), [firebase.json](firebase.json) |
 ## 실행
 
 ```bash
