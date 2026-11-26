@@ -514,7 +514,7 @@ Validator는 위반마다 아래 코드와 위치(증상 ID, 단계 번호)를 `
 | `GUIDE_NOT_FOUND` | 없는 증상 ID (`GuideNotFoundException`) | 홈으로 이동 | "찾을 수 없는 가이드입니다." |
 | `FAVORITE_FAILED` | 즐겨찾기 저장 실패 (`StorageException`) | 상태 되돌림 | "즐겨찾기를 저장하지 못했어요." |
 
-현재 코드는 `SOURCE_*`, `REF_BROKEN`, `REVIEW_*`, `STEP_*`, `FIELD_EMPTY`, `CAUTION_MISSING`, `TAPE_RANGE`, `VERSION_FORMAT`을 문장 형태의 오류로 검사한다. 코드 값으로 통일하는 일과 `FIELD_LENGTH`, `ENUM_INVALID` 구현은 구현 일정의 작업이며, 구현 전까지는 이 표가 목표 계약이다.
+2026-11-27 기준 `lib/core/validation.dart`와 `tool/validate_content.mjs`는 위 코드 중 검증 규칙에 해당하는 13개(`SOURCE_*`, `REF_BROKEN`, `REVIEW_*`, `STEP_*`, `FIELD_*`, `ENUM_INVALID`, `CAUTION_MISSING`, `TAPE_RANGE`, `VERSION_FORMAT`)를 `코드: 위치` 형식으로 출력한다. 존재하지 않는 `bodyPartId`는 `REF_BROKEN`, `reviewedAt` 형식 오류(`YYYY-MM-DD` 아님)는 `REVIEW_DATE_MISSING`으로 처리한다. 앱 런타임 코드(`NO_GUIDES`, `LOAD_FAILED`, `GUIDE_NOT_FOUND`, `FAVORITE_FAILED`)는 아직 미구현이다. `TAPE_RANGE`는 앱의 증상 제외 판단(`validateCatalog`)에서 빠지고 그림만 생략한다.
 
 #### 6.2.3 예시 데이터 검증 기록
 
@@ -607,8 +607,10 @@ Firebase 로컬 에뮬레이터(Firestore, Auth)로 규칙과 저장소 동작�
 | 규칙 테스트 | T-14~T-16, T-30 | (미실행) | Firebase 에뮬레이터 | — |
 | 콘텐츠 검증 스크립트 | `tool/validate_content.mjs` (T-25의 Node 쪽) | 2026-11-27 | Node v26.13.1, Windows | 통과 ("콘텐츠 검증 통과") |
 | 정적 분석 | 전체 코드 | 2026-11-27 | Flutter 3.50.1 / Dart 3.14.0, `flutter analyze` | 오류 0건, 안내(info) 10건 (8.3 참고) |
-| 단위 (일부) | `test/validation_test.dart` 4건: 콘텐츠 원본 검증 통과, 발목 5단계·출처, 없는 출처 참조 오류, `published=false` 제외 | 2026-11-27 | `flutter test` | 4건 모두 통과 |
-| 단위·위젯 (나머지) | T-01~T-09, T-11, T-12, T-17, T-18, T-25~T-27, T-29 중 위 4건에 해당하지 않는 것 | (미실행) | `flutter test` | — |
+| 단위 (최초 실행) | `test/validation_test.dart` 4건: 콘텐츠 원본 검증 통과, 발목 5단계·출처, 없는 출처 참조 오류, `published=false` 제외 | 2026-11-27 | `flutter test` | 4건 모두 통과 |
+| 단위 T-25 (Dart) | `test/validation_test.dart` 23건: 위 4건 + 버전 비교 + 잘못된 데이터 18건이 기대한 오류 코드로 거부됨 | 2026-11-27 | `flutter test` | 23건 모두 통과 |
+| 스크립트 T-25 (Node) | `tool/validate_content.test.mjs` 19건: 원본 통과 + 같은 잘못된 데이터 18건 거부 | 2026-11-27 | `node --test tool/validate_content.test.mjs` | 19건 모두 통과 |
+| 단위·위젯 (나머지) | T-05~T-09, T-11, T-12, T-17, T-18, T-27, T-29 | (미실행) | `flutter test` | — |
 | 통합 | T-10, T-10b, T-13, T-28 | (미실행) | 에뮬레이터 | — |
 | 수동 | T-20~T-23 | (미실행) | 실기기 | — |
 | 사용자 테스트 | PRD 5-1 | (미실행) | 초보자 관찰 | — |
@@ -743,7 +745,7 @@ TapeFit/
 
 | ID | 작업 | 담당(안) | 완료 기준 | 상태 |
 |---|---|---|---|---|
-| P0-1 | 모델·`GuideValidator`와 `tool/validate_content.mjs`를 6.2절 규칙에 맞춤 | 송수민 | T-01~T-04, T-25 통과 | 미착수 |
+| P0-1 | 모델·`GuideValidator`와 `tool/validate_content.mjs`를 6.2절 규칙에 맞춤 | 송수민 | T-01~T-04, T-25 통과 | 일부 완료: T-25 통과(2026-11-27, 8.1), T-01~T-04는 일부만 실행 |
 | P0-2 | `GuideRepository` (서버 → 캐시 → 번들 폴백) | 장아영 | T-11 통과 | 미착수 |
 | P0-3 | 증상 선택·안전 체크 화면 | 오준혁 | T-05, T-06 통과 | 미착수 |
 | P0-4 | 단계 가이드·완료 화면 | 오준혁 | T-07~T-09 통과 | 미착수 |
