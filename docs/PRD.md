@@ -114,7 +114,7 @@ flowchart LR
 
 **주요 화면 구성 (동작 프로토타입)**
 
-해커톤 MVP 1차 목표인 발목 가이드의 핵심 흐름을 `app/` 폴더에 구현했습니다. (콘텐츠는 샘플이며 전문가 검수 진행 중, 화면 이미지는 별도 첨부)
+해커톤 MVP 1차 목표인 발목 가이드의 핵심 흐름을 `app/` 폴더에 구현했습니다. (콘텐츠는 샘플이며 전문가 검수 예정)
 
 | 순서 | 화면 | 내용 |
 |---|---|---|
@@ -155,12 +155,12 @@ flowchart LR
 
 ## 7. 참고 자료 (출처)
 
-| 구분 | 출처 | 활용 내용 |
+| 구분 | 출처 | 활용 예정 내용 |
 |---|---|---|
-| 학술 | Kinesio Taping 급성 발목 염좌 체계적 문헌고찰, *Journal of Clinical Medicine* 2025, 14(5), 1440 — https://www.mdpi.com/2077-0383/14/5/1440 | 발목 염좌에서 테이핑 종류별 효과와 한계 → 안전 문구, "치료 대체 아님" 근거 |
-| 학술 | "Is Kinesio taping an effective approach for acute ankle sprains? A systematic review and meta-analysis" (ScienceDirect, 2026) — https://www.sciencedirect.com/org/science/article/pii/S2058524126000332 | 'I'자 키네시올로지 테이프의 통증·붓기·기능 개선 보고 → 발목 가이드(통증형) 테이프 종류 선정 |
+| 학술 | Kinesio Taping 급성 발목 염좌 체계적 문헌고찰, *Journal of Clinical Medicine* 2025, 14(5), 1440 — https://www.mdpi.com/2077-0383/14/5/1440 | 발목 염좌에서 테이핑 종류별 효과와 한계 → 안전 문구, "치료 대체 아님" 근거로 활용 예정 |
+| 학술 | "Is Kinesio taping an effective approach for acute ankle sprains? A systematic review and meta-analysis" (ScienceDirect, 2026) — https://www.sciencedirect.com/org/science/article/pii/S2058524126000332 | 'I'자 키네시올로지 테이프의 통증·붓기·기능 개선 보고 → 발목 가이드(통증형) 테이프 종류 선정 시 참고 예정 |
 | 콘텐츠 검수 | 팀원 송수민 (스포츠테이핑 자격증) | 단계·당김 강도·주의사항 검수 (결과는 5-1에 기재) |
 | 추가 예정 | 테이프 제조사 공식 사용 설명서, 의료기관 발목 염좌 안내 자료 | 가이드별 출처 2개 이상 교차 확인 (앱 내 출처 표시) |
 
-- 현재 앱의 가이드 문구는 샘플이며, 위 자료와 송수민 검수를 거쳐 확정합니다. 인터뷰·사용자 테스트 결과는 실제 진행 후 5-1과 1번 항목에 기재합니다.
+- 현재 앱의 가이드 문구는 일반 상식 기반의 샘플이며 아직 위 자료로 검증되지 않았습니다. 출처 교차 확인과 송수민 검수를 거쳐 확정할 예정입니다. 인터뷰·사용자 테스트 결과는 실제 진행 후 5-1과 1번 항목에 기재합니다.
 
