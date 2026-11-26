@@ -1,0 +1,84 @@
+{
+  "meta": {
+    "contentVersion": "2026.11.1",
+    "schemaVersion": 1,
+    "disclaimer": "일반 참고용입니다. 송수민 검수 전이며 의학적 진단·치료를 대체하지 않습니다. 증상이 심하면 진료를 받으세요."
+  },
+  "bodyParts": [
+    { "id": "ankle", "name": "발목", "available": true, "order": 1 },
+    { "id": "knee", "name": "무릎", "available": false, "order": 2 },
+    { "id": "wrist", "name": "손목", "available": false, "order": 3 },
+    { "id": "shoulder", "name": "어깨", "available": false, "order": 4 },
+    { "id": "back", "name": "허리", "available": false, "order": 5 }
+  ],
+  "guides": [
+    {
+      "id": "ankle_instability",
+      "bodyPartId": "ankle",
+      "name": "발목 불안정감 (가벼운 염좌 후)",
+      "tape": "리지드 테이프 + 언더랩",
+      "tapeNeeded": "리지드 테이프, 언더랩, 가위",
+      "sources": ["S3", "S5", "S6"],
+      "published": true,
+      "review": { "status": "pending", "reviewer": "송수민", "reviewedAt": null },
+      "steps": [
+        {
+          "order": 1,
+          "title": "피부 준비",
+          "body": "땀과 오염을 씻고 말리세요. 체모는 제거하고, 상처는 거즈로 덮으세요. 붙이는 동안 움직이지 마세요.",
+          "tension": "없음",
+          "sources": ["S3"],
+          "tape": []
+        },
+        {
+          "order": 2,
+          "title": "앵커",
+          "body": "종아리 근육 바로 아래쪽에 테이프를 2~3줄 둘러 시작점을 고정하세요.",
+          "tension": "당기지 않음",
+          "sources": ["S3", "S5"],
+          "tape": [[[80, 96], [130, 96]]]
+        },
+        {
+          "order": 3,
+          "title": "스터럽",
+          "body": "발 안쪽에서 발뒤꿈치 아래를 지나 바깥쪽으로 U자로 붙여 인대를 지지하세요. 총 3줄을 붙입니다.",
+          "tension": "약하게",
+          "sources": ["S3", "S5"],
+          "tape": [[[82, 96], [82, 150], [86, 190], [105, 206], [124, 190], [128, 150], [128, 96]]]
+        },
+        {
+          "order": 4,
+          "title": "호스슈",
+          "body": "스터럽을 고정하는 용도로 말발굽 모양으로 붙여 발목이 좌우로 흔들리지 않게 하세요. (붙이는 위치는 송수민 검수 예정)",
+          "tension": "약하게",
+          "sources": ["S3"],
+          "tape": [[[128, 150], [112, 178], [96, 186], [82, 160]]]
+        },
+        {
+          "order": 5,
+          "title": "마무리 확인",
+          "body": "앤드로 끝맺고, 조이거나 아프면 떼고 다시 붙이세요. 피부가 창백하거나 테이프가 파고들면 너무 강한 것입니다.",
+          "tension": "당기지 않음",
+          "sources": ["S3"],
+          "tape": [[[80, 90], [130, 90]], [[80, 102], [130, 102]]]
+        }
+      ],
+      "cautions": [
+        { "text": "조이거나 아프면 다시 붙이고, 붙인 테이프 위에 덧붙이지 말고, 구김 없이 붙이세요.", "sources": ["S3"] },
+        { "text": "매일 반복해 붙인다면 피부 보호를 위해 언더랩을 사용하세요.", "sources": ["S3"] },
+        { "text": "골절·탈구가 의심되면 테이핑만 믿고 움직이지 마세요.", "sources": ["S3"] },
+        { "text": "붓기·멍이 심하거나 체중을 실을 수 없으면 테이핑 전에 전문의 진료를 받으세요.", "sources": ["S6"] },
+        { "text": "붙이기 전 알레르기·피부 상처를 확인하고, 붙인 뒤 저림·색 변화가 있으면 즉시 제거하세요.", "sources": ["S5"] },
+        { "text": "붙인 채로 오래 두지 말고, 불편하면 바로 제거하세요.", "sources": ["S4"] }
+      ]
+    }
+  ],
+  "references": [
+    { "id": "S1", "type": "학술", "title": "Kinesio Taping 급성 발목 염좌 체계적 문헌고찰, Journal of Clinical Medicine 2025, 14(5), 1440", "url": "https://www.mdpi.com/2077-0383/14/5/1440" },
+    { "id": "S2", "type": "학술", "title": "Is Kinesio taping an effective approach for acute ankle sprains? A systematic review and meta-analysis (2026)", "url": "https://www.sciencedirect.com/org/science/article/pii/S2058524126000332" },
+    { "id": "S3", "type": "의료기관", "title": "서울대학교병원 의학정보 \"테이핑 요법\"", "url": "https://www.snuh.org/health/nMedInfo/nView.do?medid=BB000097" },
+    { "id": "S4", "type": "콘텐츠 검수", "title": "팀원 송수민 (스포츠테이핑 자격증)", "url": "" },
+    { "id": "S5", "type": "교육 자료", "title": "Athletic Therapy Skills, \"Ankle Inversion and Eversion\"", "url": "https://pressbooks.openedmb.ca/athletictherapy/chapter/ankle-inversion-and-eversion/" },
+    { "id": "S6", "type": "의료기관", "title": "서울대학교병원 의학정보 \"발목염좌\"", "url": "https://www.snuh.org/health/nMedInfo/nView.do?medid=AA000550" }
+  ]
+}
