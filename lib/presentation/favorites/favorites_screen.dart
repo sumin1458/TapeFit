@@ -18,7 +18,7 @@ class FavoritesScreen extends ConsumerWidget {
     ];
     return Scaffold(
       appBar: AppBar(title: const Text('즐겨찾기')),
-      bottomNavigationBar: const TapeFitNavBar(index: 1),
+      bottomNavigationBar: const TapeFitNavBar(index: 2),
       body: items.isEmpty
           ? const Center(child: Text('아직 즐겨찾기한 가이드가 없어요.'))
           : ListView(

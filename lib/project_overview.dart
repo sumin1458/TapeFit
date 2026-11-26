@@ -9,8 +9,8 @@
 /// flutter run -d chrome                         # 웹 실행 (Flutter 3.50.1 / Dart 3.14)
 /// node tool/validate_content.mjs                # 콘텐츠 검증
 /// node --test tool/validate_content.test.mjs    # Node 검증 테스트 19건
-/// flutter analyze                               # 오류 0건 (안내 12건, 모두 material.dart 사용 중단 안내)
-/// flutter test                                  # 32건 통과 (2026-11-27, TRD 8.1)
+/// flutter analyze                               # 오류 0건 (안내 16건, 모두 material.dart 사용 중단 안내)
+/// flutter test                                  # 33건 통과 (2026-11-27, TRD 8.1)
 /// ```
 ///
 /// ## 콘텐츠 (`lib/data/guide_content.dart` = `content/guides.json` = `assets/fallback/guides.json`)
@@ -36,7 +36,7 @@
 /// `test/fixtures/invalid_cases.json`을 함께 사용한다.
 ///
 /// ## 구현 범위
-/// 구현: 홈, 안전 체크, 단계 가이드, 완료, 즐겨찾기(기기 저장), 출처 링크,
+/// 구현: 홈, 부위/더보기/MY 탭, 안전 체크, 단계 가이드, 완료, 즐겨찾기(기기 저장), 출처 링크,
 /// 검수 배지, 번들 폴백, 원격 실패 시 폴백.
 /// 범위 제외: 시작 초기화 흐름, Analytics, 점검 화면,
 /// Firebase 실제 연결(`firebase_options.dart`는 자리표시자), Android/iOS 실행.

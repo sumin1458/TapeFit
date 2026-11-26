@@ -54,8 +54,8 @@ Firebase 설정 전에는 번들 데이터(`lib/data/guide_content.dart`)와 기
 flutter pub get
 node tool/validate_content.mjs                 # 콘텐츠 검증
 node --test tool/validate_content.test.mjs     # Node 검증 테스트 (19건)
-flutter analyze                                # 오류 0건 (안내 12건)
-flutter test                                   # 32건
+flutter analyze                                # 오류 0건 (안내 16건)
+flutter test                                   # 33건
 ```
 
-2026-11-27 실행 결과: 콘텐츠 검증 통과, `flutter test` 32건 통과, Node 테스트 19건 통과, `flutter analyze` 오류 0건. 자세한 기록과 미실행 항목은 `docs/TRD.md` 8.1절, 구현 범위는 1.5절을 참고하세요.
+2026-11-27 실행 결과: 콘텐츠 검증 통과, `flutter test` 33건 통과, Node 테스트 19건 통과, `flutter analyze` 오류 0건. 자세한 기록과 미실행 항목은 `docs/TRD.md` 8.1절, 구현 범위는 1.5절을 참고하세요.

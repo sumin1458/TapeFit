@@ -625,6 +625,7 @@ Firebase 로컬 에뮬레이터(Firestore, Auth)로 규칙과 저장소 동작�
 | T-37 | 번들 콘텐츠가 검증 규칙(`validateBundle`)을 통과한다 | NFR-03 | 단위 | 오류 0건 |
 | T-38 | 즐겨찾기를 저장하면 새 저장소 객체(앱 재시작)에서도 남아 있다 | FR-09 | 단위 | 값 유지 |
 | T-39 | 즐겨찾기를 해제하면 저장소에서도 사라진다 | FR-09 | 단위 | 빈 목록 |
+| T-40 | 하단 탭(홈·부위·즐겨찾기·더보기·MY)으로 화면이 이동한다 | - | 위젯 | 탭 5개 |
 ### 8.1 실행 결과 기록
 
 위 계획은 **설계이며, 아래 표가 채워지기 전까지 통과로 간주하지 않는다.** 실행할 때마다 날짜·환경·결과를 기록한다.
@@ -633,10 +634,11 @@ Firebase 로컬 에뮬레이터(Firestore, Auth)로 규칙과 저장소 동작�
 |---|---|---|---|---|
 | 규칙 테스트 | T-14~T-16, T-30 | (미실행) | Firebase 에뮬레이터 | — |
 | 콘텐츠 검증 스크립트 | `tool/validate_content.mjs` (T-25의 Node 쪽) | 2026-11-27 | Node v26.13.1, Windows | 통과 ("콘텐츠 검증 통과") |
-| 정적 분석 | 전체 코드 | 2026-11-27 | Flutter 3.50.1 / Dart 3.14.0, `flutter analyze` | 오류 0건, 안내(info) 12건 (8.3 참고) |
+| 정적 분석 | 전체 코드 | 2026-11-27 | Flutter 3.50.1 / Dart 3.14.0, `flutter analyze` | 오류 0건, 안내(info) 16건 (8.3 참고) |
 | 위젯 (화면) | `test/widget_screens_test.dart` 4건: T-31~T-34 | 2026-11-27 | `flutter test` | 4건 모두 통과 |
 | 번들 콘텐츠 | `test/bundled_content_test.dart` 3건: T-35~T-37 | 2026-11-27 | `flutter test` | 3건 모두 통과 |
 | 즐겨찾기 저장 | `test/favorite_persistence_test.dart` 2건: T-38, T-39 | 2026-11-27 | `flutter test` | 2건 모두 통과 (전체 `flutter test` 32건 통과) |
+| 하단 탭 | `test/bottom_tabs_test.dart` 1건: T-40 | 2026-11-27 | `flutter test` | 통과 (전체 `flutter test` 33건 통과) |
 | 웹 빌드·수동 확인 | `flutter build web --release` 후 브라우저에서 홈·단계 가이드 확인 | 2026-11-27 | Flutter 3.50.1, Windows, 로컬 웹 서버 | 빌드 성공, 출처 링크·검수 배지·인체 아이콘 표시 확인 (실기기 아님) |
 | 단위 (최초 실행) | `test/validation_test.dart` 4건: 콘텐츠 원본 검증 통과, 발목 5단계·출처, 없는 출처 참조 오류, `published=false` 제외 | 2026-11-27 | `flutter test` | 4건 모두 통과 |
 | 단위 T-25 (Dart) | `test/validation_test.dart` 23건: 위 4건 + 버전 비교 + 잘못된 데이터 18건이 기대한 오류 코드로 거부됨 | 2026-11-27 | `flutter test` | 23건 모두 통과 |
@@ -667,7 +669,7 @@ Firebase 로컬 에뮬레이터(Firestore, Auth)로 규칙과 저장소 동작�
 
 | 날짜 | 테스트 ID | 실패 내용 | 원인 | 수정 (커밋/PR) | 재실행 결과 |
 |---|---|---|---|---|---|
-| 2026-11-27 | 정적 분석 | `package:flutter/material.dart` 사용 중단 안내 12건 (`deprecated_member_use`, 총 12건). `prefer_const_constructors`, `prefer_null_aware_operators` 각 1건은 수정함 | 설치한 Flutter 3.50.1에서 해당 import가 `material_ui`로 이전 예정으로 표시됨. 동작에는 영향 없음 | 미수정 (후속 정리 대상) | 오류 0건 |
+| 2026-11-27 | 정적 분석 | `package:flutter/material.dart` 사용 중단 안내 16건 (`deprecated_member_use`, 총 16건; 탭 화면 3개 추가로 4건 늘어남). `prefer_const_constructors`, `prefer_null_aware_operators` 각 1건은 수정함 | 설치한 Flutter 3.50.1에서 해당 import가 `material_ui`로 이전 예정으로 표시됨. 동작에는 영향 없음 | 미수정 (후속 정리 대상) | 오류 0건 |
 | 2026-11-27 | 정적 분석 | `lib/domain/guide_models.dart`의 `prefer_null_aware_operators` 안내 1건 | `null` 비교를 `?.`로 쓰라는 권장 | 미수정 (후속 정리 대상) | 오류 0건 |
 
 ---
@@ -737,6 +739,9 @@ TapeFit/
 │     ├─ guide/widgets/source_badge.dart      # 출처·검수 상태
 │     ├─ complete/complete_screen.dart        # ④
 │     ├─ favorites/favorites_screen.dart
+│     ├─ parts/parts_screen.dart            # 부위 탭
+│     ├─ more/more_screen.dart              # 더보기 탭
+│     ├─ my/my_screen.dart                  # MY 탭
 │     └─ maintenance/maintenance_screen.dart  # (예정) 점검 안내
 ├─ tool/
 │  ├─ validate_content.mjs               # 업로드 전 콘텐츠 검증 (6.2절 규칙)
@@ -748,6 +753,7 @@ TapeFit/
 │  ├─ widget_screens_test.dart           # 화면 (T-31~T-34)
 │  ├─ bundled_content_test.dart          # 번들 콘텐츠 일치 (T-35~T-37)
 │  ├─ favorite_persistence_test.dart     # 즐겨찾기 기기 저장 (T-38, T-39)
+│  ├─ bottom_tabs_test.dart              # 하단 탭 5개 이동 (T-40)
 │  ├─ (예정) repository_test.dart, analytics_test.dart, rules/firestore.rules.test.mjs  # 에뮬레이터·규칙 테스트
 ├─ firestore.rules                       # 5.4절
 ├─ firestore.indexes.json
