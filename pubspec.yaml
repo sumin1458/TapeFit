@@ -23,4 +23,3 @@ flutter:
   uses-material-design: true
   assets:
     - assets/fallback/guides.json
-    - assets/images/qr.png
