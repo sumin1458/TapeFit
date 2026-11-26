@@ -625,7 +625,7 @@ Firebase 로컬 에뮬레이터(Firestore, Auth)로 규칙과 저장소 동작�
 | T-37 | 번들 콘텐츠가 검증 규칙(`validateBundle`)을 통과한다 | NFR-03 | 단위 | 오류 0건 |
 | T-38 | 즐겨찾기를 저장하면 새 저장소 객체(앱 재시작)에서도 남아 있다 | FR-09 | 단위 | 값 유지 |
 | T-39 | 즐겨찾기를 해제하면 저장소에서도 사라진다 | FR-09 | 단위 | 빈 목록 |
-| T-40 | 하단 탭(홈·부위·즐겨찾기·더보기·MY)으로 화면이 이동한다 | - | 위젯 | 탭 5개 |
+| T-40 | 하단 탭(홈·AI검사·즐겨찾기·더보기·MY)으로 화면이 이동한다 | - | 위젯 | 탭 5개 |
 ### 8.1 실행 결과 기록
 
 위 계획은 **설계이며, 아래 표가 채워지기 전까지 통과로 간주하지 않는다.** 실행할 때마다 날짜·환경·결과를 기록한다.
@@ -739,7 +739,7 @@ TapeFit/
 │     ├─ guide/widgets/source_badge.dart      # 출처·검수 상태
 │     ├─ complete/complete_screen.dart        # ④
 │     ├─ favorites/favorites_screen.dart
-│     ├─ parts/parts_screen.dart            # 부위 탭
+│     ├─ ai_check/ai_check_screen.dart      # AI검사 탭 (업데이트 예정 안내)
 │     ├─ more/more_screen.dart              # 더보기 탭
 │     ├─ my/my_screen.dart                  # MY 탭
 │     └─ maintenance/maintenance_screen.dart  # (예정) 점검 안내
