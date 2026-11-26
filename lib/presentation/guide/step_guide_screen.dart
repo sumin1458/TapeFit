@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../application/guide_providers.dart';
 import '../../domain/guide_models.dart';
+import 'widgets/leg_3d_view.dart';
 import 'widgets/source_badge.dart';
 import 'widgets/tape_diagram.dart';
 
@@ -17,6 +18,7 @@ class StepGuideScreen extends ConsumerStatefulWidget {
 
 class _StepGuideScreenState extends ConsumerState<StepGuideScreen> {
   int _index = 0;
+  bool _view3d = true;
 
   @override
   Widget build(BuildContext context) {
@@ -55,7 +57,20 @@ class _StepGuideScreenState extends ConsumerState<StepGuideScreen> {
         const SizedBox(height: 4),
         Text('${_index + 1} / ${s.steps.length} 단계'),
         const SizedBox(height: 12),
-        if (step.tape.isNotEmpty)
+        Center(
+          child: SegmentedButton<bool>(
+            segments: const [
+              ButtonSegment(value: true, label: Text('3D 보기')),
+              ButtonSegment(value: false, label: Text('2D 도식')),
+            ],
+            selected: {_view3d},
+            onSelectionChanged: (v) => setState(() => _view3d = v.first),
+          ),
+        ),
+        const SizedBox(height: 8),
+        if (_view3d)
+          Leg3DView(stepIndex: _index)
+        else if (step.tape.isNotEmpty)
           Center(
             child: ConstrainedBox(
               constraints: const BoxConstraints(maxHeight: 260),

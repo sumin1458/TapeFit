@@ -26,7 +26,7 @@ void main() {
 
     await tester.tap(find.text('AI검사'));
     await tester.pumpAndSettle();
-    expect(find.text('업데이트 예정'), findsOneWidget);
+    expect(find.textContaining('AI 코치 (규칙 기반)'), findsOneWidget);
 
     await tester.tap(find.text('더보기'));
     await tester.pumpAndSettle();

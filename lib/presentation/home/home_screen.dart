@@ -7,6 +7,7 @@ import '../../app/theme.dart';
 import '../../application/guide_providers.dart';
 import '../../domain/guide_models.dart';
 import '../guide/widgets/source_badge.dart';
+import '../safety/safety_check_screen.dart' show redFlags;
 import 'body_icon.dart';
 
 const _partIcons = <String, IconData>{
@@ -71,12 +72,64 @@ class HomeScreen extends ConsumerWidget {
                 ],
               ),
               const SizedBox(height: 20),
-              Text('추천 가이드', style: Theme.of(context).textTheme.titleLarge),
-              const SizedBox(height: 6),
-              for (final s in symptoms) _SymptomCard(symptom: s),
+              const _InfoCard(
+                icon: Icons.fact_check_outlined,
+                title: '테이핑 전 확인사항',
+                subtitle: '하나라도 해당하면 테이핑 대신 진료를 먼저 받으세요.',
+                items: redFlags,
+              ),
+              if (symptoms.isNotEmpty) ...[
+                const SizedBox(height: 12),
+                _InfoCard(
+                  icon: Icons.warning_amber_rounded,
+                  title: '주의사항',
+                  subtitle: '${symptoms.first.name} 가이드 기준이에요.',
+                  items: [for (final c in symptoms.first.cautions) c.text],
+                ),
+              ],
             ],
           );
         },
+      ),
+    );
+  }
+}
+
+class _InfoCard extends StatelessWidget {
+  const _InfoCard({
+    required this.icon,
+    required this.title,
+    required this.subtitle,
+    required this.items,
+  });
+  final IconData icon;
+  final String title, subtitle;
+  final List<String> items;
+
+  @override
+  Widget build(BuildContext context) {
+    return Card(
+      margin: EdgeInsets.zero,
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+          Row(children: [
+            Icon(icon, color: brandBlue),
+            const SizedBox(width: 8),
+            Text(title, style: Theme.of(context).textTheme.titleMedium),
+          ]),
+          const SizedBox(height: 4),
+          Text(subtitle, style: const TextStyle(fontSize: 12, color: Colors.black54)),
+          const SizedBox(height: 8),
+          for (final t in items)
+            Padding(
+              padding: const EdgeInsets.symmetric(vertical: 3),
+              child: Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                const Text('• '),
+                Expanded(child: Text(t)),
+              ]),
+            ),
+        ]),
       ),
     );
   }
@@ -151,31 +204,6 @@ class _PartTile extends StatelessWidget {
                 style: const TextStyle(fontSize: 12, color: Colors.black54)),
           ]),
         ),
-      ),
-    );
-  }
-}
-
-class _SymptomCard extends StatelessWidget {
-  const _SymptomCard({required this.symptom});
-  final Symptom symptom;
-
-  @override
-  Widget build(BuildContext context) {
-    return Card(
-      child: ListTile(
-        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-        leading: const CircleAvatar(
-          backgroundColor: surfaceTint,
-          child: Icon(Icons.healing, color: brandBlue),
-        ),
-        title: Text(symptom.name, style: const TextStyle(fontWeight: FontWeight.w700)),
-        subtitle: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [Text(symptom.tape), ReviewBadge(review: symptom.review)],
-        ),
-        trailing: const Icon(Icons.chevron_right),
-        onTap: () => context.push('/safety/${symptom.id}'),
       ),
     );
   }
