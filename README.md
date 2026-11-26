@@ -20,7 +20,7 @@ flutter run -d chrome          # 웹 (Android/iOS는 `flutter create . --platfor
 ```
 
 필요 환경: Flutter 3.50.1(Dart 3.14), Node 20+ (콘텐츠 검증용). `web/` 폴더가 포함되어 있어 바로 웹으로 실행됩니다.
-Firebase 설정 전에는 번들 데이터(`assets/fallback/guides.json`)와 메모리 즐겨찾기로 동작합니다.
+Firebase 설정 전에는 번들 데이터(`lib/data/guide_content.dart`)와 메모리 즐겨찾기로 동작합니다.
 
 ## 폴더 구조
 
@@ -28,7 +28,7 @@ Firebase 설정 전에는 번들 데이터(`assets/fallback/guides.json`)와 메
 |---|---|
 | `lib/domain`, `lib/data`, `lib/application`, `lib/presentation` | 모델·저장소·상태(Riverpod)·화면 |
 | `lib/core/validation.dart` | 콘텐츠 검증 (오류 코드 13개) |
-| `content/guides.json` | 콘텐츠 원본 (수정 시 `assets/fallback/guides.json`에 복사) |
+| `content/guides.json` | 콘텐츠 원본 (수정 시 `assets/fallback/guides.json`과 `lib/data/guide_content.dart`도 같게 고치고 `flutter test`로 일치 확인) |
 | `tool/validate_content.mjs` | Node 검증 스크립트 (Dart와 같은 규칙) |
 | `test/` | 단위·위젯 테스트와 `fixtures/invalid_cases.json` |
 | `docs/PRD.md`, `docs/TRD.md` | 요구사항·기술 설계(실행 결과 포함) |
@@ -46,7 +46,7 @@ Firebase 설정 전에는 번들 데이터(`assets/fallback/guides.json`)와 메
    GOOGLE_APPLICATION_CREDENTIALS=<키 경로> GCLOUD_PROJECT=<프로젝트 ID> node tool/seed/seed.mjs
    ```
 
-콘텐츠 원본은 `content/guides.json`이며, 수정하면 `assets/fallback/guides.json`에도 복사하세요.
+콘텐츠 원본은 `content/guides.json`이며, 수정하면 `assets/fallback/guides.json`과 `lib/data/guide_content.dart`도 같게 고치세요(`flutter test`의 T-35가 일치를 검사).
 
 ## 테스트
 
@@ -54,8 +54,8 @@ Firebase 설정 전에는 번들 데이터(`assets/fallback/guides.json`)와 메
 flutter pub get
 node tool/validate_content.mjs                 # 콘텐츠 검증
 node --test tool/validate_content.test.mjs     # Node 검증 테스트 (19건)
-flutter analyze                                # 오류 0건 (안내 13건)
-flutter test                                   # 27건
+flutter analyze                                # 오류 0건 (안내 14건)
+flutter test                                   # 30건
 ```
 
-2026-11-27 실행 결과: 콘텐츠 검증 통과, `flutter test` 27건 통과, Node 테스트 19건 통과, `flutter analyze` 오류 0건. 자세한 기록과 미실행 항목은 `docs/TRD.md` 8.1절, 구현 범위는 1.5절을 참고하세요.
+2026-11-27 실행 결과: 콘텐츠 검증 통과, `flutter test` 30건 통과, Node 테스트 19건 통과, `flutter analyze` 오류 0건. 자세한 기록과 미실행 항목은 `docs/TRD.md` 8.1절, 구현 범위는 1.5절을 참고하세요.

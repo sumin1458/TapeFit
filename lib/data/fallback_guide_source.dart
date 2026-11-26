@@ -1,14 +1,10 @@
-import 'dart:convert';
-
-import 'package:flutter/services.dart' show rootBundle;
-
 import '../domain/guide_models.dart';
+import 'guide_content.dart';
 
 class FallbackGuideSource {
   Future<GuideCatalog> load() async {
-    final raw = await rootBundle.loadString('assets/fallback/guides.json');
     return GuideCatalog.fromBundle(
-      Map<String, dynamic>.from(jsonDecode(raw) as Map),
+      Map<String, dynamic>.from(bundledGuideContent),
       fromFallback: true,
     );
   }
