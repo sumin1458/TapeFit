@@ -270,6 +270,32 @@ sequenceDiagram
 | 캐시 콘텐츠가 `minContentVersion` 미만 | 캐시를 버리고 서버를 다시 읽는다. 오프라인이면 번들이 기준을 충족할 때만 번들, 아니면 점검 화면 |
 | 캐시 콘텐츠 자체의 나이 | 만료로 막지 않는다 (검수된 문구는 시간이 지나도 유효). 마지막 서버 확인이 7일을 넘으면 "마지막 확인: N일 전"을 표시 |
 
+**앱 시작 초기화 순서 (의사코드)**
+
+```text
+main():
+  1. Firebase.initializeApp()                 // 실패해도 앱은 계속 (번들로 동작)
+  2. 인증: 익명 로그인 시도                    // 실패해도 가이드는 열람 가능, 즐겨찾기만 비활성
+  3. config = RemoteConfig.fetch(타임아웃 3초)   // 실패 시 마지막 저장값 사용 (위 표)
+  4. if config.guidesEnabled == false: → 점검 화면, 종료
+  5. candidates = [서버 meta/app+guides, 캐시, 번들]  // 서버는 온라인일 때만
+  6. 각 후보를 GuideValidator로 검증하고 minContentVersion 이상만 남김
+  7. 가장 높은 버전 선택. 없으면 점검 화면
+  8. 홈(증상 목록) 표시
+```
+
+**연결 상태 × 설정 조회 결과별 기대 화면** (첫 실행 = 캐시 없음)
+
+| 연결 | 설정 조회 | 캐시 | 기대 동작 |
+|---|---|---|---|
+| 온라인 | 성공, 켜짐 | 있음/없음 | 서버(또는 캐시) 콘텐츠로 홈 표시 |
+| 온라인 | 성공, 꺼짐 | 무관 | 점검 화면 |
+| 온라인 | 실패, 마지막 값 24시간 이내 | 무관 | 마지막 값에 따름 (꺼짐이면 점검 화면) |
+| 온라인 | 실패, 값 없음/만료 | 무관 | 번들 콘텐츠로 홈 + "최신 상태를 확인하지 못했어요" |
+| 오프라인 | 실패 | 있음, 버전 충족 | 마지막 값 24시간 이내면 캐시, 아니면 번들 |
+| 오프라인 | 실패 | 없음 (**첫 실행**) | 번들 콘텐츠로 홈 + 확인 불가 안내 |
+| 오프라인 | 실패 | 있음, 버전 미달 | 번들이 기준 충족이면 번들, 아니면 점검 화면 |
+
 이 정책은 "근거가 확인되지 않은 내용을 내보내지 않는다"는 원칙에 맞춰, 판단 근거가 없을 때 **가장 보수적인(빌드 시 검증된) 콘텐츠로 후퇴**하거나 차단한다.
 
 ---
@@ -444,7 +470,9 @@ service cloud.firestore {
 | `bodyPartId` | string | 1~32 | `bodyParts` 문서 ID와 일치 |
 | `name` | string | 1~60 | 공백만 있는 값 금지 |
 | `tape`, `tapeNeeded` | string | 1~60 | 공백만 있는 값 금지 |
-| `sources` (증상·단계·주의사항) | string 배열 | 증상·단계는 1~10개, 주의사항은 0~10개 | `references` 문서 ID (`^S[0-9]+$`), 중복 금지 |
+| `sources` (증상·단계) | string 배열 | 1~10개 | `references` 문서 ID (`^S[0-9]+$`), 중복 금지 |
+| `cautions` | 객체 배열 | **1~10개** (6.2절과 동일, 0개면 `CAUTION_MISSING`) | 항목은 `text`와 `sources` |
+| `cautions[].sources` | string 배열 | 0~10개 (주의사항 항목 하나가 가진 출처 수. 출처 없는 주의사항 허용) | `references` 문서 ID, 중복 금지 |
 | `published` | bool | — | `true`/`false` |
 | `review.status` | string | — | `pending`, `verified` |
 | `review.reviewer` | string | 1~30 | — |
@@ -486,7 +514,7 @@ Validator는 위반마다 아래 코드와 위치(증상 ID, 단계 번호)를 `
 | `GUIDE_NOT_FOUND` | 없는 증상 ID (`GuideNotFoundException`) | 홈으로 이동 | "찾을 수 없는 가이드입니다." |
 | `FAVORITE_FAILED` | 즐겨찾기 저장 실패 (`StorageException`) | 상태 되돌림 | "즐겨찾기를 저장하지 못했어요." |
 
-현재 코드는 `SOURCE_*`, `REF_BROKEN`, `REVIEW_*`, `STEP_*`, `FIELD_EMPTY`, `CAUTION_MISSING`, `TAPE_RANGE`, `VERSION_FORMAT`을 문장 형태의 오류로 검사한다. 코드 값으로 통일하는 일과 `FIELD_LENGTH`, `ENUM_INVALID` 구현은 구현 일정의 작업이며, 구현 전까지는 이 표가 목표 계약이다.
+2026-11-27 기준 `lib/core/validation.dart`와 `tool/validate_content.mjs`는 위 코드 중 검증 규칙에 해당하는 13개(`SOURCE_*`, `REF_BROKEN`, `REVIEW_*`, `STEP_*`, `FIELD_*`, `ENUM_INVALID`, `CAUTION_MISSING`, `TAPE_RANGE`, `VERSION_FORMAT`)를 `코드: 위치` 형식으로 출력한다. 존재하지 않는 `bodyPartId`는 `REF_BROKEN`, `reviewedAt` 형식 오류(`YYYY-MM-DD` 아님)는 `REVIEW_DATE_MISSING`으로 처리한다. 앱 런타임 코드(`NO_GUIDES`, `LOAD_FAILED`, `GUIDE_NOT_FOUND`, `FAVORITE_FAILED`)는 아직 미구현이다. `TAPE_RANGE`는 앱의 증상 제외 판단(`validateCatalog`)에서 빠지고 그림만 생략한다.
 
 #### 6.2.3 예시 데이터 검증 기록
 
@@ -577,7 +605,12 @@ Firebase 로컬 에뮬레이터(Firestore, Auth)로 규칙과 저장소 동작�
 | 범위 | 대상 테스트 | 실행일 | 환경 | 결과 |
 |---|---|---|---|---|
 | 규칙 테스트 | T-14~T-16, T-30 | (미실행) | Firebase 에뮬레이터 | — |
-| 단위·위젯 | T-01~T-09, T-11, T-12, T-17, T-18, T-25~T-27, T-29 | (미실행) | `flutter test` | — |
+| 콘텐츠 검증 스크립트 | `tool/validate_content.mjs` (T-25의 Node 쪽) | 2026-11-27 | Node v26.13.1, Windows | 통과 ("콘텐츠 검증 통과") |
+| 정적 분석 | 전체 코드 | 2026-11-27 | Flutter 3.50.1 / Dart 3.14.0, `flutter analyze` | 오류 0건, 안내(info) 10건 (8.3 참고) |
+| 단위 (최초 실행) | `test/validation_test.dart` 4건: 콘텐츠 원본 검증 통과, 발목 5단계·출처, 없는 출처 참조 오류, `published=false` 제외 | 2026-11-27 | `flutter test` | 4건 모두 통과 |
+| 단위 T-25 (Dart) | `test/validation_test.dart` 23건: 위 4건 + 버전 비교 + 잘못된 데이터 18건이 기대한 오류 코드로 거부됨 | 2026-11-27 | `flutter test` | 23건 모두 통과 |
+| 스크립트 T-25 (Node) | `tool/validate_content.test.mjs` 19건: 원본 통과 + 같은 잘못된 데이터 18건 거부 | 2026-11-27 | `node --test tool/validate_content.test.mjs` | 19건 모두 통과 |
+| 단위·위젯 (나머지) | T-05~T-09, T-11, T-12, T-17, T-18, T-27, T-29 | (미실행) | `flutter test` | — |
 | 통합 | T-10, T-10b, T-13, T-28 | (미실행) | 에뮬레이터 | — |
 | 수동 | T-20~T-23 | (미실행) | 실기기 | — |
 | 사용자 테스트 | PRD 5-1 | (미실행) | 초보자 관찰 | — |
@@ -586,7 +619,7 @@ Firebase 로컬 에뮬레이터(Firestore, Auth)로 규칙과 저장소 동작�
 
 ### 8.2 핵심 검증 절차 (실행 방법과 합격 기준)
 
-현재 코드는 이 PC에서 빌드·실행되지 않았다(Flutter·Node·Firebase CLI 미설치). 아래는 실행할 때 따를 절차이며, 결과는 8.1과 8.3에 기록한다.
+2026-11-27에 Flutter 3.50.1과 Node v26.13.1을 설치해 `flutter pub get`, `flutter analyze`, `flutter test`, `node tool/validate_content.mjs`를 실행했다(8.1). Firebase CLI는 아직 설치하지 않았고 앱 실행(`flutter run`)과 에뮬레이터 검증도 하지 않았다. 아래는 나머지 항목의 실행 절차이며, 결과는 8.1과 8.3에 기록한다.
 
 | 대상 | 준비 | 절차 | 합격 기준 | 실패 시 |
 |---|---|---|---|---|
@@ -599,11 +632,12 @@ Firebase 로컬 에뮬레이터(Firestore, Auth)로 규칙과 저장소 동작�
 
 ### 8.3 실패·수정 이력
 
-테스트가 실패하면 원인과 수정 내용을 아래에 남긴다. 아직 실행한 테스트가 없어 기록이 비어 있다.
+테스트가 실패하면 원인과 수정 내용을 아래에 남긴다. 2026-11-27 실행에서는 실패한 테스트가 없었다. 정적 분석의 안내(info) 항목은 아래에 남긴다.
 
 | 날짜 | 테스트 ID | 실패 내용 | 원인 | 수정 (커밋/PR) | 재실행 결과 |
 |---|---|---|---|---|---|
-| (없음) | — | — | — | — | — |
+| 2026-11-27 | 정적 분석 | `package:flutter/material.dart` 사용 중단 안내 9건 (`deprecated_member_use`) | 설치한 Flutter 3.50.1에서 해당 import가 `material_ui`로 이전 예정으로 표시됨. 동작에는 영향 없음 | 미수정 (후속 정리 대상) | 오류 0건 |
+| 2026-11-27 | 정적 분석 | `lib/domain/guide_models.dart`의 `prefer_null_aware_operators` 안내 1건 | `null` 비교를 `?.`로 쓰라는 권장 | 미수정 (후속 정리 대상) | 오류 0건 |
 
 ---
 
@@ -706,6 +740,18 @@ TapeFit/
 | 1일차 오후 | ① 증상 선택, ② 안전 체크, ③ 단계별 가이드(출처·당김 강도·그림) | 오준혁, 송수민 | PRD 완료 조건 ①~③ (T-05~T-07) |
 | 2일차 오전 | ④ 완료 화면, 전체 흐름 점검 → 통과 후 디자인, P1(즐겨찾기·원격 스위치·이벤트) | 장아영, 오준혁 | T-08~T-10, T-17, T-18 |
 | 2일차 오후 | 사용자 테스트, 수정, APK 빌드, 발표 준비 | 전원 | 최소 시연 기준 충족, T-20~T-24 |
+
+#### P0 작업 단위 (흐름 ①~④, 상태는 실제 진행에 맞춰 갱신)
+
+| ID | 작업 | 담당(안) | 완료 기준 | 상태 |
+|---|---|---|---|---|
+| P0-1 | 모델·`GuideValidator`와 `tool/validate_content.mjs`를 6.2절 규칙에 맞춤 | 송수민 | T-01~T-04, T-25 통과 | 일부 완료: T-25 통과(2026-11-27, 8.1), T-01~T-04는 일부만 실행 |
+| P0-2 | `GuideRepository` (서버 → 캐시 → 번들 폴백) | 장아영 | T-11 통과 | 미착수 |
+| P0-3 | 증상 선택·안전 체크 화면 | 오준혁 | T-05, T-06 통과 | 미착수 |
+| P0-4 | 단계 가이드·완료 화면 | 오준혁 | T-07~T-09 통과 | 미착수 |
+| P0-5 | 시작 초기화·설정 정책(4.1절) | 송수민 | T-26~T-28 통과 | 미착수 |
+
+완료되면 상태를 "완료", 확인한 테스트와 날짜를 8.1·8.3절과 함께 갱신한다.
 
 #### Firebase 설정 완료 기록
 
