@@ -41,4 +41,33 @@
 /// 범위 제외: 즐겨찾기 영구 저장, 시작 초기화 흐름, Analytics, 점검 화면,
 /// Firebase 실제 연결(`firebase_options.dart`는 자리표시자), Android/iOS 실행.
 /// 자세한 내용은 TRD 1.5절.
+///
+/// ## 기술 설계(TRD)와 구현 위치
+/// | TRD 절 | 설계 | 구현 파일 |
+/// |---|---|---|
+/// | 2.1 스택 | Flutter + Riverpod + go_router + Firebase | `pubspec.yaml`, `lib/main.dart` |
+/// | 3.1 구성요소 | 화면 / 상태 / 저장소 / 도메인 분리 | 아래 계층 표 |
+/// | 3.3 화면 상태 전이 | 홈 → 안전 체크 → 단계 가이드 → 완료 | `lib/app/router.dart`, `lib/presentation/*` |
+/// | 5.3 도메인 모델 | 가이드·단계·출처·검수 | `lib/domain/guide_models.dart` |
+/// | 5.4 보안 규칙 | 읽기 전용 콘텐츠, 본인 즐겨찾기 | `firestore.rules` |
+/// | 5.5 오프라인 정책 | 번들 콘텐츠로 폴백 | `lib/data/fallback_guide_source.dart`, `guide_content.dart` |
+/// | 6.1 Repository 계약 | 가이드·즐겨찾기 인터페이스 | `lib/domain/guide_repository.dart`, `lib/data/*` |
+/// | 6.2 문서 필드 규칙 | 검증 오류 코드 13개 | `lib/core/validation.dart` |
+/// | 7 오류 처리 | 시간 제한(8초), 검증 실패 폴백, 저장 실패 복구 | `lib/data/firestore_guide_repository.dart`(`FirestoreGuideRepository`, `BundledGuideRepository`), `lib/application/guide_providers.dart`(`FavoritesNotifier`) |
+///
+/// ## 계층 구조 (의존 방향: presentation → application → domain ← data)
+/// - `lib/domain`: 모델과 저장소 인터페이스 (Firebase·화면에 의존하지 않음)
+/// - `lib/data`: Firestore 저장소, 번들 폴백, 즐겨찾기 저장소(Firestore/메모리)
+/// - `lib/application`: Riverpod provider (카탈로그, 선택된 증상, 즐겨찾기)
+/// - `lib/presentation`: 홈, 안전 체크, 단계 가이드, 완료, 즐겨찾기 화면
+/// - `lib/app`: 라우터, 테마, 하단 탭 / `lib/core`: 검증 규칙
+///
+/// ## 의존성과 설정 (`pubspec.yaml`, 비밀 값 없음)
+/// - 런타임: `flutter_riverpod ^2.5.1`, `go_router ^14.2.0`, `firebase_core ^3.1.0`,
+///   `cloud_firestore ^5.0.0`, `firebase_auth ^5.0.0`, `url_launcher ^6.3.3`
+/// - 개발: `flutter_test`, `flutter_lints ^4.0.0` (`analysis_options.yaml`)
+/// - SDK: Dart `>=3.6.0 <4.0.0`
+/// - Firebase: `firebase.json`(규칙·인덱스·에뮬레이터 포트), `firestore.rules`,
+///   `firestore.indexes.json`. `lib/firebase_options.dart`는 자리표시자라
+///   실제 키가 저장소에 없고, 설정 전에는 오프라인 모드로 동작한다.
 library;

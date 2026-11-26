@@ -706,6 +706,7 @@ TapeFit/
 ├─ lib/
 │  ├─ main.dart                          # Firebase 초기화, ProviderScope, 전역 오류 핸들러
 │  ├─ firebase_options.dart              # flutterfire configure 결과
+│  ├─ project_overview.dart              # 심사·인수인계용 요약(TRD 대응표, 계층, 의존성; 실행 코드 없음)
 │  ├─ app/
 │  │  ├─ router.dart                     # /, /symptoms, /safety, /guide, /complete, /favorites, /maintenance
 │  │  └─ theme.dart
