@@ -94,13 +94,13 @@
 | 영역 | 상태 | 근거 |
 |---|---|---|
 | 증상 선택 → 안전 체크 → 단계 가이드 → 완료 흐름 | 구현됨 (웹 실행 확인) | `lib/presentation/*`, 8.1 |
-| 테이프 도식, 주의사항, 즐겨찾기(메모리) | 구현됨 | `tape_diagram.dart`, `guide_providers.dart` |
+| 테이프 도식, 주의사항, 즐겨찾기(기기 저장) | 구현됨 (`shared_preferences`, 앱을 다시 켜도 유지, T-38·T-39) | `tape_diagram.dart`, `favorite_repository.dart`, `guide_providers.dart` |
 | 출처 목록(글자 링크)과 검수 상태 배지 표시 | 구현됨 (단계·주의사항 아래, 링크 없는 출처는 설명만) | `source_badge.dart`, T-31 |
 | 콘텐츠 검증(13개 오류 코드, Dart·Node 동일 규칙) | 구현됨 | `validation.dart`, `validate_content.mjs`, T-25 |
 | 번들 JSON 폴백, 원격 실패 시 폴백 | 구현됨 (번들은 `guide_content.dart` 상수, JSON과 일치를 T-35가 검사) | `fallback_guide_source.dart`, `guide_content.dart` |
 | Firestore 연결 | 코드는 있으나 Firebase 프로젝트 미설정(실서버 검증 안 함) | `firebase_options.dart`는 자리표시자 |
 | 시작 초기화 흐름(4.1), 설정 정책(`config_service`) | **이번 범위 제외**, 후속 구현 | 11.1 P0-5 |
-| 즐겨찾기 영구 저장(Firestore) | **이번 범위 제외**, 현재는 메모리 저장 | 11.1 |
+| 즐겨찾기 계정 연동 저장(Firestore) | 코드는 있으나 Firebase 미설정으로 검증 안 함 (미설정 시 기기 저장 사용) | 11.1 |
 | Analytics 이벤트(6.3), 점검 화면, 런타임 오류 코드(`NO_GUIDES`, `LOAD_FAILED` 등) | **이번 범위 제외**, 현재는 화면 안내 문구로 처리 | 11.1 |
 | Android/iOS 실행 | 미검증 (SDK 미설치), 웹으로만 실행 확인 | 8.2 |
 
@@ -623,6 +623,8 @@ Firebase 로컬 에뮬레이터(Firestore, Auth)로 규칙과 저장소 동작�
 | T-35 | Dart 번들 콘텐츠(`lib/data/guide_content.dart`)가 `content/guides.json`, `assets/fallback/guides.json`과 같다 | FR-05, NFR-03 | 단위 | 세 파일 일치 |
 | T-36 | 번들 콘텐츠가 5단계이고 단계명·출처가 PRD와 일치한다 | FR-05 | 단위 | 5단계, 단계명 일치 |
 | T-37 | 번들 콘텐츠가 검증 규칙(`validateBundle`)을 통과한다 | NFR-03 | 단위 | 오류 0건 |
+| T-38 | 즐겨찾기를 저장하면 새 저장소 객체(앱 재시작)에서도 남아 있다 | FR-09 | 단위 | 값 유지 |
+| T-39 | 즐겨찾기를 해제하면 저장소에서도 사라진다 | FR-09 | 단위 | 빈 목록 |
 ### 8.1 실행 결과 기록
 
 위 계획은 **설계이며, 아래 표가 채워지기 전까지 통과로 간주하지 않는다.** 실행할 때마다 날짜·환경·결과를 기록한다.
@@ -631,9 +633,10 @@ Firebase 로컬 에뮬레이터(Firestore, Auth)로 규칙과 저장소 동작�
 |---|---|---|---|---|
 | 규칙 테스트 | T-14~T-16, T-30 | (미실행) | Firebase 에뮬레이터 | — |
 | 콘텐츠 검증 스크립트 | `tool/validate_content.mjs` (T-25의 Node 쪽) | 2026-11-27 | Node v26.13.1, Windows | 통과 ("콘텐츠 검증 통과") |
-| 정적 분석 | 전체 코드 | 2026-11-27 | Flutter 3.50.1 / Dart 3.14.0, `flutter analyze` | 오류 0건, 안내(info) 14건 (8.3 참고) |
+| 정적 분석 | 전체 코드 | 2026-11-27 | Flutter 3.50.1 / Dart 3.14.0, `flutter analyze` | 오류 0건, 안내(info) 12건 (8.3 참고) |
 | 위젯 (화면) | `test/widget_screens_test.dart` 4건: T-31~T-34 | 2026-11-27 | `flutter test` | 4건 모두 통과 |
-| 번들 콘텐츠 | `test/bundled_content_test.dart` 3건: T-35~T-37 | 2026-11-27 | `flutter test` | 3건 모두 통과 (전체 `flutter test` 30건 통과) |
+| 번들 콘텐츠 | `test/bundled_content_test.dart` 3건: T-35~T-37 | 2026-11-27 | `flutter test` | 3건 모두 통과 |
+| 즐겨찾기 저장 | `test/favorite_persistence_test.dart` 2건: T-38, T-39 | 2026-11-27 | `flutter test` | 2건 모두 통과 (전체 `flutter test` 32건 통과) |
 | 웹 빌드·수동 확인 | `flutter build web --release` 후 브라우저에서 홈·단계 가이드 확인 | 2026-11-27 | Flutter 3.50.1, Windows, 로컬 웹 서버 | 빌드 성공, 출처 링크·검수 배지·인체 아이콘 표시 확인 (실기기 아님) |
 | 단위 (최초 실행) | `test/validation_test.dart` 4건: 콘텐츠 원본 검증 통과, 발목 5단계·출처, 없는 출처 참조 오류, `published=false` 제외 | 2026-11-27 | `flutter test` | 4건 모두 통과 |
 | 단위 T-25 (Dart) | `test/validation_test.dart` 23건: 위 4건 + 버전 비교 + 잘못된 데이터 18건이 기대한 오류 코드로 거부됨 | 2026-11-27 | `flutter test` | 23건 모두 통과 |
@@ -664,7 +667,7 @@ Firebase 로컬 에뮬레이터(Firestore, Auth)로 규칙과 저장소 동작�
 
 | 날짜 | 테스트 ID | 실패 내용 | 원인 | 수정 (커밋/PR) | 재실행 결과 |
 |---|---|---|---|---|---|
-| 2026-11-27 | 정적 분석 | `package:flutter/material.dart` 사용 중단 안내 12건 (`deprecated_member_use`), `prefer_const_constructors` 1건, `prefer_null_aware_operators` 1건 (총 14건) | 설치한 Flutter 3.50.1에서 해당 import가 `material_ui`로 이전 예정으로 표시됨. 동작에는 영향 없음 | 미수정 (후속 정리 대상) | 오류 0건 |
+| 2026-11-27 | 정적 분석 | `package:flutter/material.dart` 사용 중단 안내 12건 (`deprecated_member_use`, 총 12건). `prefer_const_constructors`, `prefer_null_aware_operators` 각 1건은 수정함 | 설치한 Flutter 3.50.1에서 해당 import가 `material_ui`로 이전 예정으로 표시됨. 동작에는 영향 없음 | 미수정 (후속 정리 대상) | 오류 0건 |
 | 2026-11-27 | 정적 분석 | `lib/domain/guide_models.dart`의 `prefer_null_aware_operators` 안내 1건 | `null` 비교를 `?.`로 쓰라는 권장 | 미수정 (후속 정리 대상) | 오류 0건 |
 
 ---
@@ -708,52 +711,51 @@ TapeFit/
 │  ├─ firebase_options.dart              # flutterfire configure 결과
 │  ├─ project_overview.dart              # 심사·인수인계용 요약(TRD 대응표, 계층, 의존성; 실행 코드 없음)
 │  ├─ app/
-│  │  ├─ router.dart                     # /, /symptoms, /safety, /guide, /complete, /favorites, /maintenance
+│  │  ├─ router.dart                     # /, /safety, /guide, /complete, /favorites (구현됨. /maintenance는 예정)
+│  │  ├─ nav_bar.dart                    # 하단 탭
 │  │  └─ theme.dart
 │  ├─ domain/
 │  │  ├─ guide_models.dart               # 5.3절 모델
-│  │  └─ guide_repository.dart           # abstract GuideRepository (6.1절)
+│  │  └─ guide_repository.dart           # abstract GuideRepository, FavoriteRepository (6.1절)
 │  ├─ data/
 │  │  ├─ firestore_guide_repository.dart # 캐시 우선 조회, 번들 폴백
 │  │  ├─ fallback_guide_source.dart      # 번들 콘텐츠 로더
 │  │  ├─ guide_content.dart              # 번들 가이드 콘텐츠(Dart 상수, JSON과 동일)
-│  │  ├─ favorite_repository.dart        # users/{uid}/favorites
-│  │  ├─ auth_service.dart               # 익명 로그인
-│  │  ├─ config_service.dart             # Remote Config
-│  │  └─ analytics_service.dart          # 6.3절 이벤트
+│  │  ├─ favorite_repository.dart        # Firestore users/{uid}/favorites, 기기 저장(SharedPreferences), 메모리
+│  │  ├─ auth_service.dart               # (예정) 현재는 favorite_repository 안에서 익명 로그인
+│  │  ├─ config_service.dart             # (예정) Remote Config
+│  │  └─ analytics_service.dart          # (예정) 6.3절 이벤트
 │  ├─ application/
-│  │  ├─ guide_providers.dart
-│  │  └─ guide_session_provider.dart     # 안전 체크 상태, 현재 단계
+│  │  └─ guide_providers.dart            # 카탈로그, 증상, 즐겨찾기 (안전 체크·현재 단계는 화면 상태로 처리)
 │  ├─ core/
-│  │  └─ validation.dart                 # GuideValidator (6.2절 규칙)
+│  │  └─ validation.dart                 # 6.2절 규칙
 │  └─ presentation/
-│     ├─ home/home_screen.dart
-│     ├─ symptom/symptom_select_screen.dart   # ①
+│     ├─ home/home_screen.dart, body_icon.dart  # 홈(부위·증상 선택)
 │     ├─ safety/safety_check_screen.dart      # ②
 │     ├─ guide/step_guide_screen.dart         # ③
 │     ├─ guide/widgets/tape_diagram.dart      # CustomPainter
 │     ├─ guide/widgets/source_badge.dart      # 출처·검수 상태
 │     ├─ complete/complete_screen.dart        # ④
 │     ├─ favorites/favorites_screen.dart
-│     └─ maintenance/maintenance_screen.dart  # 점검 안내
+│     └─ maintenance/maintenance_screen.dart  # (예정) 점검 안내
 ├─ tool/
 │  ├─ validate_content.mjs               # 업로드 전 콘텐츠 검증 (6.2절 규칙)
+│  ├─ validate_content.test.mjs          # 검증 스크립트 테스트 (19건)
 │  └─ seed/seed.mjs                      # Admin SDK로 Firestore 업로드 (서비스 계정 키는 저장소에 올리지 않음)
 ├─ test/
-│  ├─ validation_test.dart               # T-01~T-04, T-12, T-25(Dart), T-26
+│  ├─ validation_test.dart               # 검증 규칙 (T-01~T-04, T-12, T-25, T-26)
 │  ├─ fixtures/invalid_cases.json            # 잘못된 데이터 사례 (스크립트와 앱이 같은 파일로 테스트)
-│  ├─ safety_check_test.dart             # T-06
-│  ├─ flow_test.dart                     # T-05, T-07~T-09, T-17
-│  ├─ repository_test.dart               # T-10, T-11, T-13 (에뮬레이터)
-│  ├─ analytics_test.dart                # T-18
-│  └─ rules/firestore.rules.test.mjs     # T-14~T-16
+│  ├─ widget_screens_test.dart           # 화면 (T-31~T-34)
+│  ├─ bundled_content_test.dart          # 번들 콘텐츠 일치 (T-35~T-37)
+│  ├─ favorite_persistence_test.dart     # 즐겨찾기 기기 저장 (T-38, T-39)
+│  ├─ (예정) repository_test.dart, analytics_test.dart, rules/firestore.rules.test.mjs  # 에뮬레이터·규칙 테스트
 ├─ firestore.rules                       # 5.4절
 ├─ firestore.indexes.json
-├─ firebase.json, .firebaserc            # Firestore, 에뮬레이터 설정
+├─ firebase.json                         # Firestore, 에뮬레이터 설정 (.firebaserc는 프로젝트 생성 후 추가 예정)
 └─ pubspec.yaml
 ```
 
-핵심 의존성: `flutter_riverpod`, `go_router`, `firebase_core`, `cloud_firestore`, `firebase_auth`, `firebase_remote_config`, `firebase_analytics` (선택: `firebase_crashlytics`).
+핵심 의존성: `flutter_riverpod`, `go_router`, `firebase_core`, `cloud_firestore`, `firebase_auth`, `shared_preferences`, `url_launcher` (예정: `firebase_remote_config`, `firebase_analytics`, 선택: `firebase_crashlytics`).
 
 비밀 관리: 서비스 계정 키와 `.env`류는 커밋하지 않는다(`.gitignore`). `firebase_options.dart`의 클라이언트 설정값은 공개되어도 보안 규칙이 접근을 통제하므로 커밋해도 된다.
 

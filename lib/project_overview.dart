@@ -9,8 +9,8 @@
 /// flutter run -d chrome                         # 웹 실행 (Flutter 3.50.1 / Dart 3.14)
 /// node tool/validate_content.mjs                # 콘텐츠 검증
 /// node --test tool/validate_content.test.mjs    # Node 검증 테스트 19건
-/// flutter analyze                               # 오류 0건 (안내 14건)
-/// flutter test                                  # 30건 통과 (2026-11-27, TRD 8.1)
+/// flutter analyze                               # 오류 0건 (안내 12건, 모두 material.dart 사용 중단 안내)
+/// flutter test                                  # 32건 통과 (2026-11-27, TRD 8.1)
 /// ```
 ///
 /// ## 콘텐츠 (`lib/data/guide_content.dart` = `content/guides.json` = `assets/fallback/guides.json`)
@@ -36,9 +36,9 @@
 /// `test/fixtures/invalid_cases.json`을 함께 사용한다.
 ///
 /// ## 구현 범위
-/// 구현: 홈, 안전 체크, 단계 가이드, 완료, 즐겨찾기(메모리), 출처 링크,
+/// 구현: 홈, 안전 체크, 단계 가이드, 완료, 즐겨찾기(기기 저장), 출처 링크,
 /// 검수 배지, 번들 폴백, 원격 실패 시 폴백.
-/// 범위 제외: 즐겨찾기 영구 저장, 시작 초기화 흐름, Analytics, 점검 화면,
+/// 범위 제외: 시작 초기화 흐름, Analytics, 점검 화면,
 /// Firebase 실제 연결(`firebase_options.dart`는 자리표시자), Android/iOS 실행.
 /// 자세한 내용은 TRD 1.5절.
 ///
@@ -57,7 +57,7 @@
 ///
 /// ## 계층 구조 (의존 방향: presentation → application → domain ← data)
 /// - `lib/domain`: 모델과 저장소 인터페이스 (Firebase·화면에 의존하지 않음)
-/// - `lib/data`: Firestore 저장소, 번들 폴백, 즐겨찾기 저장소(Firestore/메모리)
+/// - `lib/data`: Firestore 저장소, 번들 폴백, 즐겨찾기 저장소(Firestore/기기 저장/메모리)
 /// - `lib/application`: Riverpod provider (카탈로그, 선택된 증상, 즐겨찾기)
 /// - `lib/presentation`: 홈, 안전 체크, 단계 가이드, 완료, 즐겨찾기 화면
 /// - `lib/app`: 라우터, 테마, 하단 탭 / `lib/core`: 검증 규칙

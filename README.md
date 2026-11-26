@@ -20,7 +20,7 @@ flutter run -d chrome          # 웹 (Android/iOS는 `flutter create . --platfor
 ```
 
 필요 환경: Flutter 3.50.1(Dart 3.14), Node 20+ (콘텐츠 검증용). `web/` 폴더가 포함되어 있어 바로 웹으로 실행됩니다.
-Firebase 설정 전에는 번들 데이터(`lib/data/guide_content.dart`)와 메모리 즐겨찾기로 동작합니다.
+Firebase 설정 전에는 번들 데이터(`lib/data/guide_content.dart`)와 기기 저장 즐겨찾기로 동작합니다.
 
 ## 폴더 구조
 
@@ -54,8 +54,8 @@ Firebase 설정 전에는 번들 데이터(`lib/data/guide_content.dart`)와 메
 flutter pub get
 node tool/validate_content.mjs                 # 콘텐츠 검증
 node --test tool/validate_content.test.mjs     # Node 검증 테스트 (19건)
-flutter analyze                                # 오류 0건 (안내 14건)
-flutter test                                   # 30건
+flutter analyze                                # 오류 0건 (안내 12건)
+flutter test                                   # 32건
 ```
 
-2026-11-27 실행 결과: 콘텐츠 검증 통과, `flutter test` 30건 통과, Node 테스트 19건 통과, `flutter analyze` 오류 0건. 자세한 기록과 미실행 항목은 `docs/TRD.md` 8.1절, 구현 범위는 1.5절을 참고하세요.
+2026-11-27 실행 결과: 콘텐츠 검증 통과, `flutter test` 32건 통과, Node 테스트 19건 통과, `flutter analyze` 오류 0건. 자세한 기록과 미실행 항목은 `docs/TRD.md` 8.1절, 구현 범위는 1.5절을 참고하세요.

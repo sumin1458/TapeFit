@@ -15,7 +15,9 @@ import 'firebase_options.dart';
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  final overrides = <Override>[];
+  final overrides = <Override>[
+    favoriteRepositoryProvider.overrideWithValue(PersistentFavoriteRepository()),
+  ];
   try {
     await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
     final db = FirebaseFirestore.instance;
@@ -29,7 +31,7 @@ Future<void> main() async {
       ),
     ]);
   } catch (e) {
-    // Firebase 미설정/초기화 실패: 번들 데이터 + 메모리 즐겨찾기로 계속 동작한다.
+    // Firebase 미설정/초기화 실패: 번들 데이터 + 기기 저장 즐겨찾기로 계속 동작한다.
     debugPrint('Firebase 사용 불가, 오프라인 모드로 실행: $e');
   }
 

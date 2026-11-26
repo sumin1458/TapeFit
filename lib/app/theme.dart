@@ -33,7 +33,7 @@ ThemeData buildTheme() {
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       ),
     ),
-    navigationBarTheme: NavigationBarThemeData(
+    navigationBarTheme: const NavigationBarThemeData(
       backgroundColor: Colors.white,
       indicatorColor: surfaceTint,
       surfaceTintColor: Colors.transparent,
