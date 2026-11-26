@@ -5,6 +5,14 @@ import 'package:flutter/material.dart';
 
 import 'leg_model.dart';
 
+/// 손그림 가이드의 색: 1 분홍, 2 주황, 3 파랑, 그 외 기본색.
+Color _stepColor(int step, Color fallback) => switch (step) {
+      1 => const Color(0xFFF06292),
+      2 => const Color(0xFFFB8C00),
+      3 => const Color(0xFF1E6BE0),
+      _ => fallback,
+    };
+
 /// 종아리~발 3D 모형 위에 단계별 테이핑 위치를 보여 준다.
 /// 드래그로 360도 회전(위아래 포함), 두 손가락·마우스 휠로 확대·축소한다.
 /// 외부 3D 패키지 없이 정점을 직접 회전·투영해 그린다.
@@ -174,7 +182,7 @@ class _LegPainter extends CustomPainter {
     for (var s = 0; s <= step; s++) {
       final isCurrent = s == step;
       for (final strip in tapeStripsForStep(s)) {
-        final base = strip.underwrap ? const Color(0xFFE9E1C9) : accent;
+        final base = strip.underwrap ? const Color(0xFFE9E1C9) : _stepColor(s, accent);
         final color = isCurrent ? base : base.withValues(alpha: 0.4);
         final pts = strip.points;
         for (var i = 0; i < pts.length - 1; i++) {

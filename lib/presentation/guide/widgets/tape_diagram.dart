@@ -47,8 +47,14 @@ class _TapePainter extends CustomPainter {
 
     for (var i = 0; i <= current && i < steps.length; i++) {
       final isCurrent = i == current;
+      final color = switch (i) {
+        1 => const Color(0xFFF06292),
+        2 => const Color(0xFFFB8C00),
+        3 => const Color(0xFF1E6BE0),
+        _ => accent,
+      };
       final paint = Paint()
-        ..color = isCurrent ? accent : accent.withValues(alpha: 0.3)
+        ..color = isCurrent ? color : color.withValues(alpha: 0.3)
         ..style = PaintingStyle.stroke
         ..strokeWidth = isCurrent ? 7 : 5
         ..strokeCap = StrokeCap.round

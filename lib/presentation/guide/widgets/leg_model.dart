@@ -157,20 +157,21 @@ class LegMesh {
   }
 }
 
-/// 단계별 테이프 줄. 인덱스 0 = 피부 준비(언더랩), 1 = 앵커, 2 = 스터럽,
-/// 3 = 호스슈, 4 = 마무리 고정. 5단계가 아닌 가이드는 줄이 없다.
+/// 단계별 테이프 줄. 인덱스 0 = 피부 준비(언더랩), 1 = 분홍 테이프(U자, 발 양옆),
+/// 2 = 주황 X 테이프(복숭아뼈 아래), 3 = 파랑 감기 테이프, 4 = 마무리 고정.
+/// 5단계가 아닌 가이드는 줄이 없다.
 List<TapeStrip> tapeStripsForStep(int index) {
   switch (index) {
     case 0:
       return [_underwrap()];
     case 1:
-      return [_ring(11, 2.8)];
-    case 2:
       return [_stirrup()];
+    case 2:
+      return _orangeX();
     case 3:
-      return [_horseshoe()];
+      return [_blueWrap()];
     case 4:
-      return [_ring(13, 2.8), _ring(9.5, 2.8)];
+      return [_ring(13, 2.4)];
     default:
       return const [];
   }
@@ -197,7 +198,7 @@ TapeStrip _underwrap() {
 TapeStrip _stirrup() {
   const t0 = 0.19;
   final pts = <SurfacePoint>[];
-  for (var y = 11.0; y >= 0; y -= 2) {
+  for (var y = 14.0; y >= 0; y -= 2) {
     pts.add(legPoint(y, math.pi / 2, off: _off));
   }
   const arc = 14;
@@ -205,23 +206,40 @@ TapeStrip _stirrup() {
   for (var i = 0; i <= arc; i++) {
     pts.add(footPoint(t0, phiStart + (phiEnd - phiStart) * i / arc, off: _off));
   }
-  for (var y = 0.0; y <= 11; y += 2) {
+  for (var y = 0.0; y <= 14; y += 2) {
     pts.add(legPoint(y, -math.pi / 2, off: _off));
   }
   return TapeStrip(pts, 2.6);
 }
 
-TapeStrip _horseshoe() {
-  const y0 = -2.5;
-  const ts = [0.3, 0.22, 0.14, 0.07, 0.0, -0.03];
-  double phiAt(double t) {
-    final s = ((y0 - footCenterY(t)) / footHalfHeight(t)).clamp(-1.0, 1.0);
-    return math.asin(s);
+/// 발 아래를 지나 복숭아뼈 아래에서 발등 앞으로 X자로 엇갈리는 두 줄.
+List<TapeStrip> _orangeX() {
+  TapeStrip strip(double side) {
+    // side = +1 : 바깥(+x)에서 시작해 안쪽 위로, -1 : 반대
+    final phi = side > 0 ? 0.0 : math.pi;
+    final soleAdj = side > 0 ? -math.pi / 2 : -math.pi / 2;
+    final pts = <SurfacePoint>[
+      footPoint(0.08, soleAdj, off: _off),
+      footPoint(0.08, side > 0 ? -0.9 : -math.pi + 0.9, off: _off),
+      footPoint(0.08, phi, off: _off),
+      legPoint(-0.5, side * math.pi / 2, off: _off),
+    ];
+    const n = 8;
+    for (var i = 1; i <= n; i++) {
+      final f = i / n;
+      pts.add(legPoint(-0.5 + 9 * f, side * (math.pi / 2) * (1 - 2 * f), off: _off));
+    }
+    return TapeStrip(pts, 2.4);
   }
 
-  final pts = <SurfacePoint>[
-    for (final t in ts) footPoint(t, phiAt(t), off: _off),
-    for (final t in ts.reversed) footPoint(t, math.pi - phiAt(t), off: _off),
-  ];
-  return TapeStrip(pts, 2.6);
+  return [strip(1), strip(-1)];
+}
+
+/// 발목뼈가 움직이는 높이에서 바깥(+x)에서 안쪽으로 한 바퀴 반 감는 줄.
+TapeStrip _blueWrap() {
+  const n = 40;
+  return TapeStrip([
+    for (var i = 0; i <= n; i++)
+      legPoint(0.5 + 5.5 * i / n, math.pi / 2 + 2 * math.pi * 1.5 * i / n, off: _off),
+  ], 2.6);
 }

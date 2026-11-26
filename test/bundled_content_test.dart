@@ -19,7 +19,7 @@ void main() {
     final steps = guide['steps'] as List;
     expect(steps.length, 5);
     expect(steps.map((s) => (s as Map)['title']),
-        ['피부 준비', '앵커', '스터럽', '호스슈', '마무리 확인']);
+        ['피부 준비', '분홍 테이프', '주황 X 테이프', '파랑 감기 테이프', '마무리 확인']);
     for (final s in steps) {
       expect(((s as Map)['sources'] as List), isNotEmpty);
     }
