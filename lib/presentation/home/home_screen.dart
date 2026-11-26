@@ -7,6 +7,7 @@ import '../../app/theme.dart';
 import '../../application/guide_providers.dart';
 import '../../domain/guide_models.dart';
 import '../guide/widgets/source_badge.dart';
+import 'body_icon.dart';
 
 const _partIcons = <String, IconData>{
   'ankle': Icons.directions_walk,
@@ -140,8 +141,9 @@ class _PartTile extends StatelessWidget {
           child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
             CircleAvatar(
               backgroundColor: enabled ? surfaceTint : Colors.grey.shade200,
-              child: Icon(_partIcons[part.id] ?? Icons.healing,
-                  color: enabled ? brandBlue : Colors.grey),
+              child: BodyIcon.supports(part.id)
+                  ? BodyIcon(partId: part.id, bodyColor: enabled ? brandBlueDark : Colors.grey.shade600)
+                  : Icon(_partIcons[part.id] ?? Icons.healing, color: enabled ? brandBlue : Colors.grey),
             ),
             const SizedBox(height: 8),
             Text(part.name, style: const TextStyle(fontWeight: FontWeight.w700)),
