@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../application/guide_providers.dart';
+import '../../app/nav_bar.dart';
 
 class FavoritesScreen extends ConsumerWidget {
   const FavoritesScreen({super.key});
@@ -17,6 +18,7 @@ class FavoritesScreen extends ConsumerWidget {
     ];
     return Scaffold(
       appBar: AppBar(title: const Text('즐겨찾기')),
+      bottomNavigationBar: const TapeFitNavBar(index: 1),
       body: items.isEmpty
           ? const Center(child: Text('아직 즐겨찾기한 가이드가 없어요.'))
           : ListView(
