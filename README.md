@@ -54,7 +54,7 @@ Firebase 설정 전에는 번들 데이터(`assets/fallback/guides.json`)와 메
 flutter pub get
 node tool/validate_content.mjs                 # 콘텐츠 검증
 node --test tool/validate_content.test.mjs     # Node 검증 테스트 (19건)
-flutter analyze                                # 오류 0건 (안내 13건)
+flutter analyze                                # 오류 0건 (안내 14건)
 flutter test                                   # 27건
 ```
 

@@ -628,7 +628,7 @@ Firebase 로컬 에뮬레이터(Firestore, Auth)로 규칙과 저장소 동작�
 |---|---|---|---|---|
 | 규칙 테스트 | T-14~T-16, T-30 | (미실행) | Firebase 에뮬레이터 | — |
 | 콘텐츠 검증 스크립트 | `tool/validate_content.mjs` (T-25의 Node 쪽) | 2026-11-27 | Node v26.13.1, Windows | 통과 ("콘텐츠 검증 통과") |
-| 정적 분석 | 전체 코드 | 2026-11-27 | Flutter 3.50.1 / Dart 3.14.0, `flutter analyze` | 오류 0건, 안내(info) 13건 (8.3 참고) |
+| 정적 분석 | 전체 코드 | 2026-11-27 | Flutter 3.50.1 / Dart 3.14.0, `flutter analyze` | 오류 0건, 안내(info) 14건 (8.3 참고) |
 | 위젯 (화면) | `test/widget_screens_test.dart` 4건: T-31~T-34 | 2026-11-27 | `flutter test` | 4건 모두 통과 (전체 `flutter test` 27건 통과) |
 | 웹 빌드·수동 확인 | `flutter build web --release` 후 브라우저에서 홈·단계 가이드 확인 | 2026-11-27 | Flutter 3.50.1, Windows, 로컬 웹 서버 | 빌드 성공, 출처 링크·검수 배지·인체 아이콘 표시 확인 (실기기 아님) |
 | 단위 (최초 실행) | `test/validation_test.dart` 4건: 콘텐츠 원본 검증 통과, 발목 5단계·출처, 없는 출처 참조 오류, `published=false` 제외 | 2026-11-27 | `flutter test` | 4건 모두 통과 |
@@ -660,7 +660,7 @@ Firebase 로컬 에뮬레이터(Firestore, Auth)로 규칙과 저장소 동작�
 
 | 날짜 | 테스트 ID | 실패 내용 | 원인 | 수정 (커밋/PR) | 재실행 결과 |
 |---|---|---|---|---|---|
-| 2026-11-27 | 정적 분석 | `package:flutter/material.dart` 사용 중단 안내 11건 (`deprecated_member_use`), `prefer_const_constructors` 1건 추가 (UI 변경 후 총 13건) | 설치한 Flutter 3.50.1에서 해당 import가 `material_ui`로 이전 예정으로 표시됨. 동작에는 영향 없음 | 미수정 (후속 정리 대상) | 오류 0건 |
+| 2026-11-27 | 정적 분석 | `package:flutter/material.dart` 사용 중단 안내 12건 (`deprecated_member_use`), `prefer_const_constructors` 1건, `prefer_null_aware_operators` 1건 (총 14건) | 설치한 Flutter 3.50.1에서 해당 import가 `material_ui`로 이전 예정으로 표시됨. 동작에는 영향 없음 | 미수정 (후속 정리 대상) | 오류 0건 |
 | 2026-11-27 | 정적 분석 | `lib/domain/guide_models.dart`의 `prefer_null_aware_operators` 안내 1건 | `null` 비교를 `?.`로 쓰라는 권장 | 미수정 (후속 정리 대상) | 오류 0건 |
 
 ---
