@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>TapeFit 발표 (8분)</title>
+<style>
+  :root { --blue:#1E6BE0; --pink:#F06292; --orange:#FB8C00; --ink:#14213D; --bg:#F3F6FB; }
+  * { box-sizing:border-box; margin:0; padding:0; }
+  html,body { height:100%; overflow:hidden; background:#0b1220; font-family:"Malgun Gothic","Apple SD Gothic Neo",system-ui,sans-serif; color:var(--ink); }
+  #stage { position:absolute; left:50%; top:50%; width:1280px; height:720px; transform-origin:center; }
+  .slide { position:absolute; inset:0; background:var(--bg); padding:60px 80px; opacity:0; visibility:hidden;
+           transform:translateX(60px); transition:opacity .5s, transform .5s, visibility .5s; overflow:hidden; }
+  .slide.active { opacity:1; visibility:visible; transform:none; }
+  .slide.past { transform:translateX(-60px); }
+  .dark { background:linear-gradient(135deg,#0F2D6B,#1E6BE0); color:#fff; }
+  h1 { font-size:84px; letter-spacing:-2px; }
+  h2 { font-size:44px; margin-bottom:30px; }
+  h2 small { display:block; font-size:20px; color:var(--blue); font-weight:600; margin-bottom:6px; }
+  .dark h2 small { color:#BBD3FF; }
+  p, li { font-size:26px; line-height:1.55; }
+  ul { list-style:none; }
+  li { margin-bottom:6px; }
+  li::before { content:"●"; color:var(--blue); margin-right:12px; font-size:16px; vertical-align:middle; }
+  .dark li::before { color:#BBD3FF; }
+  .note { font-size:18px; color:#5b6784; margin-top:22px; }
+  .dark .note { color:#BBD3FF; }
+  .grid { display:grid; gap:22px; }
+  .g3 { grid-template-columns:repeat(3,1fr); } .g2 { grid-template-columns:repeat(2,1fr); }
+  .card { background:#fff; border-radius:20px; padding:24px; box-shadow:0 6px 22px rgba(20,33,61,.08); }
+  .card b { font-size:28px; display:block; margin-bottom:8px; }
+  .card span { font-size:21px; color:#4a5572; line-height:1.5; display:block; }
+  .emoji { font-size:50px; display:block; margin-bottom:6px; }
+  .big { font-size:110px; font-weight:800; color:var(--blue); line-height:1; }
+  .slide .step { opacity:0; transform:translateY(24px); }
+  .slide.active .step { animation:rise .6s forwards; animation-delay:calc(var(--i,0) * .18s + .25s); }
+  @keyframes rise { to { opacity:1; transform:none; } }
+  .tag { display:inline-block; padding:6px 16px; border-radius:99px; background:#fff; color:var(--blue); font-weight:700; font-size:20px; }
+  .time { display:none; }
+  #bar { position:fixed; left:0; top:0; height:5px; background:var(--pink); transition:width .4s; z-index:9; }
+  #count { position:fixed; right:18px; bottom:12px; color:#8ea0c4; font-size:14px; z-index:9; }
+  #hint { position:fixed; left:18px; bottom:12px; color:#8ea0c4; font-size:14px; z-index:9; }
+  .draw { stroke-dasharray:600; stroke-dashoffset:600; }
+  .slide.active .draw { animation:dash 1.6s forwards; animation-delay:calc(var(--i,0) * .8s + .4s); }
+  @keyframes dash { to { stroke-dashoffset:0; } }
+  .row { display:flex; gap:40px; align-items:center; }
+  .float { animation:float 3s ease-in-out infinite; }
+  @keyframes float { 50% { transform:translateY(-12px); } }
+  .vs { display:grid; grid-template-columns:1fr 1fr; gap:22px; }
+  .bad { border-top:8px solid #b0b8cc; } .good { border-top:8px solid var(--blue); }
+  .spin { animation:spin 6s linear infinite; transform-origin:50% 50%; }
+  @keyframes spin { to { transform:rotate(360deg); } }
+  /* 발표자 노트 (N 키) */
+  #notes { position:fixed; left:0; right:0; bottom:0; max-height:34vh; overflow:auto; background:rgba(11,18,32,.95); color:#fff;
+           padding:16px 28px; font-size:18px; line-height:1.6; display:none; z-index:20; }
+  #notes.on { display:block; }
+</style>
+</head>
+<body>
+<div id="bar"></div><div id="hint">← → 이동 · F 전체화면 · N 발표자 노트</div><div id="count"></div>
+<div id="notes"></div>
+<div id="stage">
+
+<!-- 1 표지 -->
+<section class="slide dark" data-notes="안녕하세요. 내 몸에 딱 맞는 스마트 테이핑 가이드, TapeFit(테이프핏) 팀 발표를 맡은 오준혁입니다.">
+  <span class="time">0:00</span>
+  <h1 class="step" style="--i:1; margin-top:30px">TapeFit <span style="font-size:48px">테이프핏</span></h1>
+  <p class="step" style="--i:2; font-size:38px; margin-top:22px">내 몸에 딱 맞는 스마트 테이핑 가이드</p>
+  <p class="step" style="--i:3; margin-top:18px">발표 오준혁</p>
+  <svg class="float" style="position:absolute; right:110px; top:150px" width="300" height="300" viewBox="0 0 300 300">
+    <circle cx="150" cy="150" r="120" fill="#F06292"/><circle cx="150" cy="150" r="52" fill="#fafafa"/>
+    <path d="M190 262 H280 V240 H190Z" fill="#F06292" stroke="#fff" stroke-width="3"/>
+  </svg>
+</section>
+
+<!-- 2 기획 의도: 문제 -->
+<section class="slide" data-notes="요즘 러닝 크루, 헬스, 테니스, 풋살처럼 스포츠를 즐기는 20대가 정말 많습니다. 운동량이 늘수록 근육 뻐근함이나 발목·무릎의 가벼운 불편함도 잦아졌고, 병원 가기 전 가장 손쉬운 방법이 스포츠 테이핑입니다.">
+  <span class="time">0:10</span>
+  <h2><small>01 기획 의도</small>테이핑이 필요한 운동인·일반인, 어디서 배워야 할까요?</h2>
+  <div class="grid g3">
+    <div class="card step" style="--i:0"><span class="emoji">🏃</span><b>러닝 · 풋살</b><span>운동량이 늘수록 발목·무릎이 불편해져요</span></div>
+    <div class="card step" style="--i:1"><span class="emoji">🏋️</span><b>헬스 · 테니스</b><span>근육 뻐근함이 잦아져요</span></div>
+    <div class="card step" style="--i:2"><span class="emoji">🩹</span><b>스포츠 테이핑</b><span>병원 가기 전 가장 손쉬운 방법</span></div>
+  </div>
+</section>
+
+<!-- 3 문제: 흩어진 정보 -->
+<section class="slide" data-notes="하지만 테이핑을 잘 모르는 일반인이 막상 붙여보려 하면 벽에 부딪힙니다. 정보가 유튜브, 블로그, 쇼핑몰 상세 페이지에 흩어져 있어 내 증상에 맞는 방법을 한눈에 찾기 어렵습니다. 그래서 단 하나의 앱 안에서 쉽고, 입체적이고, 안전하게 따라 할 수 있는 통합 서비스를 기획했습니다.">
+  <span class="time">0:35</span>
+  <h2><small>02 문제</small>정보는 여기저기 흩어져 있어요</h2>
+  <div class="row" style="gap:30px">
+    <div class="grid g2" style="flex:1">
+      <div class="card step" style="--i:0"><span class="emoji">▶️</span><b>유튜브</b></div>
+      <div class="card step" style="--i:1"><span class="emoji">📝</span><b>블로그</b></div>
+      <div class="card step" style="--i:2"><span class="emoji">🛒</span><b>쇼핑몰 상세페이지</b></div>
+      <div class="card step" style="--i:3"><span class="emoji">❓</span><b>내 증상에 맞는 방법?</b></div>
+    </div>
+    <div class="step" style="--i:4; font-size:64px">➡️</div>
+    <div class="card step dark" style="--i:5; flex:.8; background:var(--blue); color:#fff"><span class="emoji">📱</span><b style="color:#fff">TapeFit 하나로</b><span style="color:#DCE8FF">쉽고 · 입체적이고 · 안전하게</span></div>
+  </div>
+</section>
+
+<!-- 4 차별점 3가지 -->
+<section class="slide" data-notes="기존 앱이나 영상과 다른 점은 세 가지입니다. 첫째, 평면 2D에서 3D로. 기존 앱이나 영상은 정면 위주 사진이나 고정 각도 영상만 보여줍니다. 관절은 입체적이라 테이프가 뒤꿈치나 복사뼈를 돌아 어디로 감기는지 이해하기 어렵습니다. TapeFit은 360도 회전·확대가 가능한 3D 모델로 어느 각도에서든 부착 위치를 확인합니다. 둘째, 사전 안전 체크. 기존 콘텐츠는 통증의 원인을 따지지 않고 붙이는 방법부터 알려주지만, TapeFit은 골절 의심, 심한 부종, 피부 알레르기 같은 위험 신호를 먼저 걸러 병원 진료가 우선인 상황을 예방합니다. 셋째, 탐색부터 구매, 사후 확인까지 이어지는 올인원 구조. 영상은 따로, 테이프는 쇼핑몰에서 따로 찾던 것을 부위별 가이드 + 용어 사전 + 용도별 테이프 스토어로 한 앱에 묶었고, 추후 AI 카메라로 부착 상태를 검사하는 기능까지 연결할 예정입니다.">
+  <span class="time">1:10</span>
+  <h2><small>03 차별점</small>기존 앱·영상과 다른 세 가지</h2>
+  <div class="grid g3">
+    <div class="card good step" style="--i:0"><span class="emoji">🧊</span><b>① 2D → 3D</b><span>360° 회전·확대로 복사뼈·뒤꿈치를 도는 테이프도 한눈에</span></div>
+    <div class="card good step" style="--i:1"><span class="emoji">🛡️</span><b>② 사전 안전 체크</b><span>골절 의심·심한 부종·알레르기를 먼저 걸러요</span></div>
+    <div class="card good step" style="--i:2"><span class="emoji">🧩</span><b>③ 올인원</b><span>가이드 + 용어 사전 + 스토어 (AI 검사는 예정)</span></div>
+  </div>
+  <p class="note step" style="--i:3">기존: 정면 사진·고정 영상 / 무조건 붙이는 법부터 / 영상·구매 따로 검색</p>
+</section>
+
+<!-- 5 핵심 가치 -->
+<section class="slide dark" data-notes="정리하면 세 가지 가치입니다. 통합성: 흩어진 정보·용어·구매처를 한곳에. 직관성: 3D 시각화와 단계별 색상 구분. 신뢰성: 출처 표기와 사전 안전 체크.">
+  <span class="time">2:20</span>
+  <h2><small>04 핵심 가치</small>통합성 · 직관성 · 신뢰성</h2>
+  <div class="grid g3">
+    <div class="card step" style="--i:0; color:var(--ink)"><span class="emoji">🗂️</span><b>통합성</b><span>부위별 정보 · 용어 · 구매처를 한곳에</span></div>
+    <div class="card step" style="--i:1; color:var(--ink)"><span class="emoji">👁️</span><b>직관성</b><span>3D 시각화 + 단계별 색상 구분</span></div>
+    <div class="card step" style="--i:2; color:var(--ink)"><span class="emoji">✅</span><b>신뢰성</b><span>출처 표기 + 사전 안전 체크</span></div>
+  </div>
+</section>
+
+<!-- 5-2 앱 소개 -->
+<section class="slide" data-notes="저희가 만든 앱을 소개합니다. TapeFit은 Flutter로 만든 웹앱으로, 하단 탭 6개로 구성했습니다. 홈에서 증상을 고르고, 가이드에서 2D·3D로 따라 하고, 즐겨찾기에 저장하고, 스토어에서 제품을 찾고, 테이핑 소개와 용어 사전은 더보기에서 봅니다. AI 검사와 MY는 추후 업데이트 예정입니다. GitHub Copilot의 AI와 함께 만들었고, Flutter를 사용해 Android와 iOS 모두에서 쓸 수 있게 했습니다. 웹 주소로 바로 체험할 수 있습니다.">
+  <span class="time">3:00</span>
+  <h2><small>앱 소개</small>TapeFit, 이런 앱이에요</h2>
+  <div class="row" style="align-items:flex-start">
+    <div style="flex:1.2">
+      <p class="step" style="--i:0; font-size:28px; margin-bottom:12px">증상을 고르면 <b>안전 확인 → 5단계 2D·3D 가이드</b>로 이어지는 테이핑 가이드 앱</p>
+      <div class="grid g3" style="gap:12px">
+        <div class="card step" style="--i:1; padding:14px"><b style="font-size:22px">🏠 홈</b><span style="font-size:17px">증상 선택 · 주의사항</span></div>
+        <div class="card step" style="--i:2; padding:14px"><b style="font-size:22px">🤖 AI검사</b><span style="font-size:17px">추후 업데이트</span></div>
+        <div class="card step" style="--i:3; padding:14px"><b style="font-size:22px">⭐ 즐겨찾기</b><span style="font-size:17px">가이드 저장</span></div>
+        <div class="card step" style="--i:4; padding:14px"><b style="font-size:22px">🛍️ 스토어</b><span style="font-size:17px">제품 구매 링크</span></div>
+        <div class="card step" style="--i:5; padding:14px"><b style="font-size:22px">➕ 더보기</b><span style="font-size:17px">테이핑 소개 · 용어 사전</span></div>
+        <div class="card step" style="--i:6; padding:14px"><b style="font-size:22px">👤 MY</b><span style="font-size:17px">추후 업데이트</span></div>
+      </div>
+    </div>
+    <div class="card step" style="--i:7; flex:.8">
+      <b style="font-size:24px">만든 방식</b>
+      <span style="font-size:20px; line-height:1.6">🤖 GitHub Copilot(AI)으로 제작<br>📱 Flutter로 Android·iOS 모두 지원</span>
+      <b style="font-size:20px; margin-top:14px">체험하기</b>
+      <span style="font-size:17px; word-break:break-all">sumin1458.github.io/TapeFit</span>
+    </div>
+  </div>
+  <p class="note step" style="--i:8">현재 실제 가이드는 발목 1개 부위이며, 단계 내용은 전문가 검수 전이에요.</p>
+</section>
+
+<!-- 6 시연 1: 홈 + 안전 체크 -->
+<section class="slide" data-notes="[시연 영상] 홈에는 발목을 비롯해 부종·림프·근막 케어까지 불편한 부위별로 정보를 모으도록 설계했고, 상단에 의료진 진료를 대체하지 않는다는 점과 테이핑 전 확인사항을 안내합니다. 발목을 누르면 바로 시작하지 않고 안전 체크를 거칩니다. (현재 실제로 열려 있는 부위는 발목이고 나머지는 준비 중입니다.)">
+  <span class="time">4:00</span>
+  <h2><small>05 시연 ①</small>홈 화면과 사전 안전 체크</h2>
+  <div class="row" style="align-items:flex-start">
+    <div class="card step" style="--i:0; flex:1"><b>🏠 홈</b><span>발목 · 부종 · 림프 · 근막 선택<br>의료진 진료 대체 안 함 안내<br>테이핑 전 확인사항</span></div>
+    <div class="card step" style="--i:2; flex:1"><b>⚠️ 안전 체크</b><span>☐ 심한 붓기·멍<br>☐ 체중을 실을 수 없음<br>☐ 골절·탈구 의심<br>☐ 피부 알레르기</span></div>
+  </div>
+  <p class="note step" style="--i:3">현재 실제 가이드는 발목만 열려 있고, 나머지 부위는 준비 중이에요.</p>
+</section>
+
+<!-- 7 시연 2: 5단계 + 3D (핵심) -->
+<section class="slide" data-notes="[핵심 하이라이트] 안전 체크를 통과하면 5단계 따라하기가 시작됩니다. 2D 도식 탭도 있지만 3D 보기 탭을 누르면 입체 발목 모델이 나타나고, 드래그로 360도 회전, 확대·축소하며 테이프 시작점과 관절을 감싸는 각도를 확인합니다. 앞·오른쪽·뒤·왼쪽·아래 프리셋 버튼, 단계별 색상 구분, 당김 강도 안내까지 한 화면에 담았습니다.">
+  <span class="time">4:20</span>
+  <h2><small>06 시연 ② 핵심</small>5단계 따라하기 + 3D 뷰어</h2>
+  <div class="row">
+    <svg width="340" height="430" viewBox="0 0 210 260" style="background:#fff;border-radius:20px">
+      <rect x="68" y="20" width="74" height="130" rx="30" fill="#F1D3B8"/>
+      <rect x="55" y="140" width="110" height="60" rx="26" fill="#F1D3B8"/>
+      <path class="draw" style="--i:0" d="M82 60 V150 Q86 205 105 215 Q124 205 128 150 V60" fill="none" stroke="#F06292" stroke-width="9" stroke-linecap="round"/>
+      <path class="draw" style="--i:1" d="M74 185 Q80 168 105 134 T132 90 M136 185 Q130 168 105 134 T78 90" fill="none" stroke="#FB8C00" stroke-width="9" stroke-linecap="round"/>
+      <path class="draw" style="--i:2" d="M132 140 L78 146 L132 152 L78 158" fill="none" stroke="#1E6BE0" stroke-width="9" stroke-linecap="round"/>
+    </svg>
+    <div style="flex:1">
+      <ul>
+        <li class="step" style="--i:0">① 피부 준비 · 발목 90°</li>
+        <li class="step" style="--i:1"><b style="color:var(--pink)">② 분홍</b> U자 → <b style="color:var(--orange)">③ 주황</b> X자 → <b style="color:var(--blue)">④ 파랑</b> 감기</li>
+        <li class="step" style="--i:2">⑤ 마무리 확인</li>
+      </ul>
+      <div class="grid g2" style="margin-top:14px">
+        <div class="card step" style="--i:3; padding:14px"><span>🔄 드래그 360° 회전 · 확대</span></div>
+        <div class="card step" style="--i:4; padding:14px"><span>🎯 앞·오른쪽·뒤·왼쪽·아래</span></div>
+        <div class="card step" style="--i:5; padding:14px"><span>🎨 단계별 색상 구분</span></div>
+        <div class="card step" style="--i:6; padding:14px"><span>💪 당김 강도 안내</span></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 8 시연 3: 즐겨찾기/스토어/사전 -->
+<section class="slide" data-notes="테이핑을 마친 뒤 자주 쓰는 부위를 즐겨찾기에 저장합니다. 스토어 탭에서는 키네시오, 비신축, 다이나믹 테이프, 언더랩 등을 바로 구매할 수 있게 쇼핑몰 링크를 연결했습니다. 여러분, 테이프 종류가 이렇게 많고 용어가 다양하단 걸 아셨나요? 이렇게 생소한 단어를 마주한 사용자를 위해 더보기에서 테이핑 용어 사전과 테이핑 소개로 앵커, 스터럽, 8자 감기 같은 낯선 용어도 쉽게 찾아볼 수 있게 했습니다. (링크는 검색 결과 페이지입니다.)">
+  <span class="time">5:00</span>
+  <h2><small>07 시연 ③</small>즐겨찾기 · 스토어 · 용어 사전</h2>
+  <div class="grid g3">
+    <div class="card step" style="--i:0"><span class="emoji">⭐</span><b>즐겨찾기</b><span>자주 쓰는 가이드를 저장해 운동 전 빠르게</span></div>
+    <div class="card step" style="--i:1"><span class="emoji">🛍️</span><b>스토어</b><span>키네시오 · 비신축 · 다이나믹 · 언더랩 · 가위 → 구매 링크</span></div>
+    <div class="card step" style="--i:2"><span class="emoji">📖</span><b>용어 사전 · 테이핑 소개</b><span>앵커 · 스터럽 같은 용어와 테이프 종류</span></div>
+  </div>
+  <p class="note step" style="--i:3; font-size:26px; color:var(--blue)">여러분, 테이프 종류가 이렇게 많고 용어가 다양하단 걸 아셨나요?</p>
+  <p class="note step" style="--i:4">스토어 링크는 쇼핑몰 검색 결과 페이지예요.</p>
+</section>
+
+<!-- 9 고도화 1: AI -->
+<section class="slide dark" data-notes="현재 버전은 통합 가이드와 3D 시각화를 완성한 단계입니다. 첫째 업그레이드는 하단 AI 검사 탭입니다. 테이핑을 마친 뒤 스마트폰 카메라로 비추면 AI 비전이 부착 위치와 각도를 분석해 교정 피드백을 줄 예정입니다. (현재는 추후 업데이트 예정 상태이며, 장력은 카메라로 보기 어려워 직접 점검을 함께 둘 계획입니다.)">
+  <span class="time">5:50</span>
+  <h2><small>08 고도화 ①</small>AI 검사: 카메라로 붙인 상태 확인</h2>
+  <div class="row">
+    <svg class="float" width="240" height="300" viewBox="0 0 120 150">
+      <rect x="10" y="5" width="100" height="140" rx="14" fill="#0b1220" stroke="#BBD3FF" stroke-width="3"/>
+      <rect x="24" y="30" width="72" height="80" fill="none" stroke="#7CFFB2" stroke-width="2" stroke-dasharray="6 4"/>
+      <circle cx="60" cy="70" r="14" fill="none" stroke="#F06292" stroke-width="3"/>
+      <text x="60" y="130" font-size="9" fill="#fff" text-anchor="middle">위치 · 각도 분석</text>
+    </svg>
+    <ul>
+      <li class="step" style="--i:0">3D 가이드대로 붙인 뒤 카메라로 비추면</li>
+      <li class="step" style="--i:1">테이프 위치·각도를 분석해 교정 피드백</li>
+      <li class="step" style="--i:2">현재: 「추후 업데이트 예정」 단계</li>
+    </ul>
+  </div>
+  <p class="note step" style="--i:3">※ 장력(당김 세기)은 카메라로 보기 어려워 직접 점검 안내를 함께 둘 계획이에요.</p>
+</section>
+
+<!-- 10 고도화 2,3 -->
+<section class="slide" data-notes="둘째, 전신 부위별 3D 인터랙티브 모델 확장입니다. 발목에 적용한 3D 뷰어를 무릎, 손목, 어깨, 허리, 근막·림프까지 순차 확대합니다. 셋째, 스포츠 종목·증상별 맞춤 추천입니다. 즐기는 운동과 불편한 동작을 선택하면 적합한 테이핑 조합을 추천하는 개인화 서비스로 고도화할 계획입니다.">
+  <span class="time">6:30</span>
+  <h2><small>09 고도화 ②③</small>전신 3D 확장과 맞춤 추천</h2>
+  <div class="grid g2">
+    <div class="card step" style="--i:0"><span class="emoji">🦴</span><b>② 전신 3D 확장</b><span>발목 → 무릎 · 손목 · 어깨 · 허리 · 근막 · 림프</span></div>
+    <div class="card step" style="--i:1"><span class="emoji">🎯</span><b>③ 종목·증상별 추천</b><span>운동 종목과 불편한 동작을 고르면 테이핑 조합을 추천</span></div>
+  </div>
+  <p class="note step" style="--i:2">전문가 검수를 거쳐 단계 내용을 확정하는 일도 함께 진행해요.</p>
+</section>
+
+<!-- 11 기대효과 -->
+<section class="slide" data-notes="TapeFit이 상용화되면 테이핑을 모르는 20,30대 생활체육인부터 일상 속 근육 피로를 느끼는 성인 누구나 스스로 내 몸을 안전하게 관리하는 셀프 케어 환경을 누릴 수 있습니다.">
+  <span class="time">7:10</span>
+  <h2><small>10 기대효과</small>누구나 안전하게 하는 셀프 케어</h2>
+  <div class="grid g3">
+    <div class="card step" style="--i:0"><span class="emoji">🧑‍🤝‍🧑</span><b>대상</b><span>테이핑을 모르는 20,30대 생활체육인, 근육 피로를 느끼는 성인</span></div>
+    <div class="card step" style="--i:1"><span class="emoji">🔗</span><b>하나로</b><span>흩어진 정보를 한 앱에 모음</span></div>
+    <div class="card step" style="--i:2"><span class="emoji">🧊</span><b>쉽게 + 확신까지</b><span>3D로 이해, (예정) AI 검사로 확인</span></div>
+  </div>
+</section>
+
+<!-- 12 클로징 -->
+<section class="slide dark" style="text-align:center" data-notes="흩어져 있던 테이핑 정보를 하나로 모으고, 3D 시각화로 누구나 쉽게 이해하게 만들며, AI 카메라 검사로 전문가에게 확인받는 듯한 확신까지 주는 서비스. 여러분의 건강한 움직임에 딱 맞는 파트너, TapeFit이 만들어 가겠습니다. 경청해 주셔서 감사합니다!">
+  <span class="time">7:40</span>
+  <h1 class="step" style="--i:0; margin-top:140px">감사합니다</h1>
+  <p class="step" style="--i:1; font-size:34px; margin-top:20px">여러분의 건강한 움직임에 딱 맞는 파트너, TapeFit</p>
+  <p class="note step" style="--i:2">github.com/sumin1458/TapeFit</p>
+</section>
+
+</div>
+<script>
+  const slides=[...document.querySelectorAll('.slide')], stage=document.getElementById('stage'), notes=document.getElementById('notes');
+  let cur=0;
+  function fit(){ const s=Math.min(innerWidth/1280, innerHeight/720); stage.style.transform=`translate(-50%,-50%) scale(${s})`; }
+  function show(n){
+    cur=Math.max(0,Math.min(slides.length-1,n));
+    slides.forEach((s,i)=>{ s.classList.toggle('active',i===cur); s.classList.toggle('past',i<cur); });
+    document.getElementById('bar').style.width=((cur+1)/slides.length*100)+'%';
+    document.getElementById('count').textContent=`${cur+1} / ${slides.length}`;
+    notes.textContent=slides[cur].dataset.notes||'';
+    history.replaceState(null,'','#'+(cur+1));
+  }
+  addEventListener('keydown',e=>{
+    if(['ArrowRight','PageDown',' ','Enter'].includes(e.key)){ e.preventDefault(); show(cur+1); }
+    else if(['ArrowLeft','PageUp','Backspace'].includes(e.key)){ e.preventDefault(); show(cur-1); }
+    else if(e.key==='Home') show(0); else if(e.key==='End') show(slides.length-1);
+    else if(e.key==='n'||e.key==='N') notes.classList.toggle('on');
+    else if(e.key==='f'||e.key==='F'){ document.fullscreenElement?document.exitFullscreen():document.documentElement.requestFullscreen(); }
+  });
+  addEventListener('click',e=>{ if(notes.contains(e.target)) return; show(e.clientX<innerWidth*0.3?cur-1:cur+1); });
+  let tx=null; addEventListener('touchstart',e=>tx=e.touches[0].clientX);
+  addEventListener('touchend',e=>{ const dx=e.changedTouches[0].clientX-tx; if(Math.abs(dx)>50) show(dx<0?cur+1:cur-1); });
+  addEventListener('resize',fit); fit();
+  show((parseInt(location.hash.slice(1))||1)-1);
+</script>
+</body>
+</html>

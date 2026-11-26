@@ -22,15 +22,31 @@ void main() {
     ));
     await tester.pumpAndSettle();
 
-    expect(find.byType(NavigationDestination), findsNWidgets(5));
+    expect(find.byType(NavigationDestination), findsNWidgets(6));
 
+    await tester.tap(find.text('스토어'));
+    await tester.pumpAndSettle();
+    expect(find.text('키네시오 테이프'), findsOneWidget);
+    await tester.tap(find.byKey(const ValueKey('product-kinesio')));
+    await tester.pumpAndSettle();
+    expect(find.text('쿠팡'), findsOneWidget);
+    expect(find.textContaining('구매 링크'), findsOneWidget);
+    await tester.tapAt(const Offset(10, 10));
+    await tester.pumpAndSettle();
     await tester.tap(find.text('AI검사'));
     await tester.pumpAndSettle();
-    expect(find.text('업데이트 예정'), findsOneWidget);
+    expect(find.text('추후 업데이트 예정'), findsOneWidget);
 
     await tester.tap(find.text('더보기'));
     await tester.pumpAndSettle();
     expect(find.text('이용 안내'), findsOneWidget);
+    expect(find.text('콘텐츠 상태'), findsNothing);
+    await tester.tap(find.byKey(const ValueKey('open-intro')));
+    await tester.pumpAndSettle();
+    expect(find.text('키네시오 테이프 (탄성 테이프)'), findsOneWidget);
+    expect(find.text('Y자 테이프'), findsOneWidget);
+    await tester.pageBack();
+    await tester.pumpAndSettle();
 
     await tester.tap(find.text('MY'));
     await tester.pumpAndSettle();
