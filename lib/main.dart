@@ -46,6 +46,15 @@ class TapeFitApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       theme: buildTheme(),
       routerConfig: appRouter,
+      builder: (context, child) => ColoredBox(
+        color: const Color(0xFFE9EEFA),
+        child: Center(
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 480),
+            child: child,
+          ),
+        ),
+      ),
     );
   }
 }
