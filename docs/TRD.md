@@ -434,6 +434,64 @@ service cloud.firestore {
 
 같은 규칙을 **세 곳**에서 확인한다: 콘텐츠 업로드 전 검증 스크립트(`tool/validate_content.mjs`, 업로드 스크립트가 먼저 실행), 앱의 `GuideValidator`, 보안 규칙(쓰기 차단·미게시 차단). 앞의 둘은 데이터 품질, 마지막은 접근 제어를 맡는다. **스크립트와 Validator가 같은 규칙을 다르게 구현하지 않도록**, 잘못된 데이터 사례(`test/fixtures/invalid_cases.json`: 출처 누락, 끊어진 참조, 단계 중복·누락·순서 오류, 좌표 범위 밖, 잘못된 버전 형식)를 두 구현이 **모두 거부**하는지 같은 파일로 테스트한다 (T-25).
 
+#### 6.2.1 필드 타입·길이·허용값
+
+길이는 문자 수이며, 현재 콘텐츠 최대값에 여유를 둔 상한이다. 상한을 넘으면 `FIELD_LENGTH` 오류로 증상을 제외한다 (검증 스크립트와 Validator가 같은 상한을 쓴다).
+
+| 필드 | 타입 | 길이·범위 | 허용값 |
+|---|---|---|---|
+| `guides/{id}` 문서 ID | string | 1~64 | 소문자·숫자·밑줄 (`^[a-z0-9_]{1,64}$`) |
+| `bodyPartId` | string | 1~32 | `bodyParts` 문서 ID와 일치 |
+| `name` | string | 1~60 | 공백만 있는 값 금지 |
+| `tape`, `tapeNeeded` | string | 1~60 | 공백만 있는 값 금지 |
+| `sources` (증상·단계·주의사항) | string 배열 | 증상·단계는 1~10개, 주의사항은 0~10개 | `references` 문서 ID (`^S[0-9]+$`), 중복 금지 |
+| `published` | bool | — | `true`/`false` |
+| `review.status` | string | — | `pending`, `verified` |
+| `review.reviewer` | string | 1~30 | — |
+| `review.reviewedAt` | string 또는 null | `YYYY-MM-DD` | `verified`이면 필수, `pending`이면 null 허용 |
+| `steps` | 객체 배열 | 발목은 정확히 5개 | 6.2절 표 |
+| `steps[].order` | int | 1~5 | 1부터 연속, 중복 금지 |
+| `steps[].title` | string | 1~20 | — |
+| `steps[].body` | string | 1~200 | — |
+| `steps[].tension` | string | — | `없음`, `당기지 않음`, `약하게` |
+| `steps[].tape` | `[[ [x, y] ... ] ...]` | 줄당 점 2개 이상, 단계당 줄 0~10개 | x는 0~210, y는 0~230의 숫자 |
+| `cautions[].text` | string | 1~120 | — |
+| `references[].type` | string | — | `학술`, `의료기관`, `교육 자료`, `콘텐츠 검수` |
+| `references[].title` | string | 1~200 | — |
+| `references[].url` | string 또는 없음 | 최대 500 | `https://`로 시작 |
+| `meta/app.contentVersion` | string | — | `^\d+\.\d+\.\d+$` |
+| `meta/app.disclaimer` | string | 1~200 | — |
+
+#### 6.2.2 오류 코드 매핑
+
+Validator는 위반마다 아래 코드와 위치(증상 ID, 단계 번호)를 `excluded` 목록에 남긴다. 검증 스크립트는 같은 코드를 출력하고 업로드를 중단한다. 화면에는 코드를 보이지 않고 7장의 안내 문구만 보인다.
+
+| 코드 | 위반 | 처리 | 사용자 안내(7장) |
+|---|---|---|---|
+| `SOURCE_MISSING` | 증상·단계의 `sources`가 비어 있음 | 증상 제외 | (표시 없음) |
+| `SOURCE_DUPLICATE` | `sources`에 같은 ID가 두 번 있음 | 증상 제외 | (표시 없음) |
+| `REF_BROKEN` | `sources`의 ID가 `references`에 없음 | 증상 제외 | (표시 없음) |
+| `REVIEW_INVALID` | `review.status`가 허용값이 아님 | 증상 제외 | (표시 없음) |
+| `REVIEW_DATE_MISSING` | `verified`인데 `reviewedAt`이 없음 | 증상 제외 | (표시 없음) |
+| `STEP_COUNT` | 단계 수가 `expectedSteps`와 다름 | 증상 제외 | (표시 없음) |
+| `STEP_ORDER` | `order`가 1부터 연속이 아니거나 중복·0 이하 | 증상 제외 | (표시 없음) |
+| `FIELD_EMPTY` | 이름·제목·본문·당김 강도·주의사항 문구가 비어 있음 | 증상 제외 | (표시 없음) |
+| `FIELD_LENGTH` | 6.2.1의 길이 상한 초과 | 증상 제외 | (표시 없음) |
+| `ENUM_INVALID` | `tension`, `type` 등이 허용값이 아님 | 증상 제외 | (표시 없음) |
+| `CAUTION_MISSING` | `cautions`가 비어 있음 | 증상 제외 | (표시 없음) |
+| `TAPE_RANGE` | 좌표가 범위 밖이거나 줄당 점이 2개 미만 | 그림만 생략 | "그림을 표시할 수 없어요." |
+| `VERSION_FORMAT` | `contentVersion`·`minContentVersion` 형식 오류 | 해당 콘텐츠 거부(4.1절) | "현재 가이드를 점검 중입니다." |
+| `NO_GUIDES` | 제외 후 남은 증상이 없음 | 빈 화면 대신 안내 | "현재 제공 가능한 가이드가 없습니다." |
+| `LOAD_FAILED` | 원격·캐시·번들 모두 실패 (`GuideLoadException`) | 재시도 버튼 | "가이드를 불러오지 못했어요. 다시 시도해 주세요." |
+| `GUIDE_NOT_FOUND` | 없는 증상 ID (`GuideNotFoundException`) | 홈으로 이동 | "찾을 수 없는 가이드입니다." |
+| `FAVORITE_FAILED` | 즐겨찾기 저장 실패 (`StorageException`) | 상태 되돌림 | "즐겨찾기를 저장하지 못했어요." |
+
+현재 코드는 `SOURCE_*`, `REF_BROKEN`, `REVIEW_*`, `STEP_*`, `FIELD_EMPTY`, `CAUTION_MISSING`, `TAPE_RANGE`, `VERSION_FORMAT`을 문장 형태의 오류로 검사한다. 코드 값으로 통일하는 일과 `FIELD_LENGTH`, `ENUM_INVALID` 구현은 구현 일정의 작업이며, 구현 전까지는 이 표가 목표 계약이다.
+
+#### 6.2.3 예시 데이터 검증 기록
+
+5.2절의 문서 예시와 `content/guides.json`이 위 규칙을 통과하는지는 T-01과 T-25로 검증하며, 결과는 8.1절에 날짜·환경과 함께 기록한다. 실행 전에는 통과로 간주하지 않는다.
+
 ### 6.3 Analytics 이벤트 약속 (FR-11)
 
 | 이벤트 | 시점 | 파라미터 |
