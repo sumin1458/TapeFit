@@ -2,7 +2,7 @@
   "meta": {
     "contentVersion": "2026.11.1",
     "schemaVersion": 1,
-    "disclaimer": "일반 참고용입니다. 의학적 진단·치료를 대체하지 않습니다. 증상이 심하면 진료를 받으세요."
+    "disclaimer": "일반 참고용이며 아직 의료 전문가의 검수를 받지 않았습니다. 의학적 진단·치료를 대체하지 않습니다. 통증·붓기·저림이 심해지거나 걷기 어려우면 중단하고 진료를 받으세요."
   },
   "bodyParts": [
     { "id": "ankle", "name": "발목", "available": true, "order": 1 },

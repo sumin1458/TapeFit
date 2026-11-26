@@ -10,7 +10,7 @@
 /// node tool/validate_content.mjs                # 콘텐츠 검증
 /// node --test tool/validate_content.test.mjs    # Node 검증 테스트 19건
 /// flutter analyze                               # 오류 0건 (안내 16건, 모두 material.dart 사용 중단 안내)
-/// flutter test                                  # 33건 통과 (2026-11-27, TRD 8.1)
+/// flutter test                                  # 41건 통과 (2026-11-27, TRD 8.1)
 /// ```
 ///
 /// ## 콘텐츠 (`lib/data/guide_content.dart` = `content/guides.json` = `assets/fallback/guides.json`)
@@ -24,7 +24,8 @@
 /// 출처 목록: S1·S2 학술 논문, S3·S6 서울대병원 의학정보, S4 콘텐츠 검수(팀원),
 /// S5 Athletic Therapy Skills. S4만 URL이 없다.
 ///
-/// ## 보안 규칙 (`firestore.rules`)
+/// ## 보안 규칙 (`firestore.rules`, 전문은 `lib/data/firestore_rules.dart`)
+/// 규칙 원본과 Dart 사본이 같은지는 T-41이 확인한다.
 /// - `meta`, `bodyParts`, `references`: 누구나 읽기, 쓰기 금지.
 /// - `guides`: `published == true`인 문서만 읽기, 쓰기 금지.
 /// - `users/{uid}/favorites/{symptomId}`: 본인만 읽기·삭제, 생성·수정은
@@ -53,7 +54,7 @@
 /// | 5.5 오프라인 정책 | 번들 콘텐츠로 폴백 | `lib/data/fallback_guide_source.dart`, `guide_content.dart` |
 /// | 6.1 Repository 계약 | 가이드·즐겨찾기 인터페이스 | `lib/domain/guide_repository.dart`, `lib/data/*` |
 /// | 6.2 문서 필드 규칙 | 검증 오류 코드 13개 | `lib/core/validation.dart` |
-/// | 7 오류 처리 | 시간 제한(8초), 검증 실패 폴백, 저장 실패 복구 | `lib/data/firestore_guide_repository.dart`(`FirestoreGuideRepository`, `BundledGuideRepository`), `lib/application/guide_providers.dart`(`FavoritesNotifier`) |
+/// | 7 오류 처리 | 시간 제한(8초), 검증 실패 폴백, 저장 실패 복구 | `lib/data/firestore_guide_repository.dart`(`RemoteFirstGuideRepository`, `FirestoreGuideRepository`, `BundledGuideRepository`), `lib/application/guide_providers.dart`(`FavoritesNotifier`), 테스트 `test/remote_failure_test.dart`(T-41~T-48) |
 ///
 /// ## 계층 구조 (의존 방향: presentation → application → domain ← data)
 /// - `lib/domain`: 모델과 저장소 인터페이스 (Firebase·화면에 의존하지 않음)

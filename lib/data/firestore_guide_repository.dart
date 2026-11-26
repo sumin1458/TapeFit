@@ -5,17 +5,22 @@ import '../domain/guide_models.dart';
 import '../domain/guide_repository.dart';
 import 'fallback_guide_source.dart';
 
-/// Firestore 우선 조회. 실패·시간 초과·검증 실패 시 번들 폴백을 반환한다.
-class FirestoreGuideRepository implements GuideRepository {
-  FirestoreGuideRepository(this._db, this._fallback);
+/// 원격 우선 조회. 실패·시간 초과·검증 실패 시 번들 폴백을 반환한다.
+class RemoteFirstGuideRepository implements GuideRepository {
+  RemoteFirstGuideRepository(
+    this._fetch,
+    this._fallback, {
+    this.timeout = const Duration(seconds: 8),
+  });
 
-  final FirebaseFirestore _db;
+  final Future<GuideCatalog> Function() _fetch;
   final FallbackGuideSource _fallback;
+  final Duration timeout;
 
   @override
   Future<GuideCatalog> loadCatalog() async {
     try {
-      final catalog = await _fetch().timeout(const Duration(seconds: 8));
+      final catalog = await _fetch().timeout(timeout);
       final hasGuide = catalog.bodyParts.any((p) => p.symptoms.isNotEmpty);
       if (!hasGuide || validateCatalog(catalog).isNotEmpty) {
         throw StateError('invalid remote content');
@@ -25,13 +30,19 @@ class FirestoreGuideRepository implements GuideRepository {
       return _fallback.load();
     }
   }
+}
 
-  Future<GuideCatalog> _fetch() async {
+/// Firestore에서 읽어 온다.
+class FirestoreGuideRepository extends RemoteFirstGuideRepository {
+  FirestoreGuideRepository(FirebaseFirestore db, FallbackGuideSource fallback)
+      : super(() => _fetchFrom(db), fallback);
+
+  static Future<GuideCatalog> _fetchFrom(FirebaseFirestore db) async {
     final results = await Future.wait([
-      _db.collection('meta').doc('app').get(),
-      _db.collection('bodyParts').get(),
-      _db.collection('guides').where('published', isEqualTo: true).get(),
-      _db.collection('references').get(),
+      db.collection('meta').doc('app').get(),
+      db.collection('bodyParts').get(),
+      db.collection('guides').where('published', isEqualTo: true).get(),
+      db.collection('references').get(),
     ]);
     final meta = (results[0] as DocumentSnapshot<Map<String, dynamic>>).data();
     if (meta == null) throw StateError('meta/app missing');

@@ -34,6 +34,7 @@ void main() {
 
     await tester.tap(find.text('MY'));
     await tester.pumpAndSettle();
-    expect(find.text('내 즐겨찾기'), findsOneWidget);
+    expect(find.text('업데이트 예정'), findsOneWidget);
+    expect(find.text('MY 기능은 곧 만나볼 수 있어요.'), findsOneWidget);
   });
 }

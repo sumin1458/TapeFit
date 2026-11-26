@@ -326,7 +326,7 @@ main():
 ```
 meta/app                         공통 정보 (단일 문서)
   contentVersion: "2026.11.1"
-  disclaimer: "일반 참고용입니다. ..."
+  disclaimer: "일반 참고용이며 아직 의료 전문가의 검수를 받지 않았습니다. ..."
   schemaVersion: 1
 bodyParts/{bodyPartId}           ankle, knee, wrist, shoulder, back
   name, available, order
@@ -626,6 +626,14 @@ Firebase 로컬 에뮬레이터(Firestore, Auth)로 규칙과 저장소 동작�
 | T-38 | 즐겨찾기를 저장하면 새 저장소 객체(앱 재시작)에서도 남아 있다 | FR-09 | 단위 | 값 유지 |
 | T-39 | 즐겨찾기를 해제하면 저장소에서도 사라진다 | FR-09 | 단위 | 빈 목록 |
 | T-40 | 하단 탭(홈·AI검사·즐겨찾기·더보기·MY)으로 화면이 이동한다 | - | 위젯 | 탭 5개 |
+| T-41 | 보안 규칙 Dart 사본(`firestore_rules.dart`)이 `firestore.rules`와 같다 | FR-08 | 단위 | 내용 일치 |
+| T-42 | 원격 조회가 예외로 실패하면 번들 폴백을 쓴다 | NFR-01 | 단위 | 예외 |
+| T-43 | 원격 응답이 시간 제한을 넘기면 번들 폴백을 쓴다 | NFR-01 | 단위 | 시간 초과 |
+| T-44 | 가이드가 비어 있는 원격 응답은 폴백으로 대체한다 | FR-08 | 단위 | 빈 응답 |
+| T-45 | 검증을 통과한 원격 응답은 폴백 없이 쓴다 | - | 단위 | 정상 응답 |
+| T-46 | 즐겨찾기 저장 실패 시 화면 상태를 되돌린다 | FR-09 | 단위 | 저장 예외 |
+| T-47 | 즐겨찾기 불러오기 실패 시 빈 목록으로 계속 동작한다 | FR-09 | 단위 | 불러오기 예외 |
+| T-48 | 안내 문구에 검수 전 상태와 진료 기준이 있고 검수 상태가 미확인이다 | FR-08 | 단위 | 검수 예정 |
 ### 8.1 실행 결과 기록
 
 위 계획은 **설계이며, 아래 표가 채워지기 전까지 통과로 간주하지 않는다.** 실행할 때마다 날짜·환경·결과를 기록한다.
@@ -639,6 +647,7 @@ Firebase 로컬 에뮬레이터(Firestore, Auth)로 규칙과 저장소 동작�
 | 번들 콘텐츠 | `test/bundled_content_test.dart` 3건: T-35~T-37 | 2026-11-27 | `flutter test` | 3건 모두 통과 |
 | 즐겨찾기 저장 | `test/favorite_persistence_test.dart` 2건: T-38, T-39 | 2026-11-27 | `flutter test` | 2건 모두 통과 (전체 `flutter test` 32건 통과) |
 | 하단 탭 | `test/bottom_tabs_test.dart` 1건: T-40 | 2026-11-27 | `flutter test` | 통과 (전체 `flutter test` 33건 통과) |
+| 원격 실패·보안 규칙·안내 문구 | `test/remote_failure_test.dart` 8건: T-41~T-48 | 2026-11-27 | `flutter test` | 8건 모두 통과 (전체 `flutter test` 41건 통과) |
 | 웹 빌드·수동 확인 | `flutter build web --release` 후 브라우저에서 홈·단계 가이드 확인 | 2026-11-27 | Flutter 3.50.1, Windows, 로컬 웹 서버 | 빌드 성공, 출처 링크·검수 배지·인체 아이콘 표시 확인 (실기기 아님) |
 | 단위 (최초 실행) | `test/validation_test.dart` 4건: 콘텐츠 원본 검증 통과, 발목 5단계·출처, 없는 출처 참조 오류, `published=false` 제외 | 2026-11-27 | `flutter test` | 4건 모두 통과 |
 | 단위 T-25 (Dart) | `test/validation_test.dart` 23건: 위 4건 + 버전 비교 + 잘못된 데이터 18건이 기대한 오류 코드로 거부됨 | 2026-11-27 | `flutter test` | 23건 모두 통과 |
@@ -720,7 +729,8 @@ TapeFit/
 │  │  ├─ guide_models.dart               # 5.3절 모델
 │  │  └─ guide_repository.dart           # abstract GuideRepository, FavoriteRepository (6.1절)
 │  ├─ data/
-│  │  ├─ firestore_guide_repository.dart # 캐시 우선 조회, 번들 폴백
+│  │  ├─ firestore_guide_repository.dart # 원격 우선 조회(RemoteFirstGuideRepository), 번들 폴백
+│  │  ├─ firestore_rules.dart            # firestore.rules 사본과 요약 (T-41)
 │  │  ├─ fallback_guide_source.dart      # 번들 콘텐츠 로더
 │  │  ├─ guide_content.dart              # 번들 가이드 콘텐츠(Dart 상수, JSON과 동일)
 │  │  ├─ favorite_repository.dart        # Firestore users/{uid}/favorites, 기기 저장(SharedPreferences), 메모리
@@ -754,6 +764,7 @@ TapeFit/
 │  ├─ bundled_content_test.dart          # 번들 콘텐츠 일치 (T-35~T-37)
 │  ├─ favorite_persistence_test.dart     # 즐겨찾기 기기 저장 (T-38, T-39)
 │  ├─ bottom_tabs_test.dart              # 하단 탭 5개 이동 (T-40)
+│  ├─ remote_failure_test.dart           # 원격 실패·보안 규칙 사본·안내 문구 (T-41~T-48)
 │  ├─ (예정) repository_test.dart, analytics_test.dart, rules/firestore.rules.test.mjs  # 에뮬레이터·규칙 테스트
 ├─ firestore.rules                       # 5.4절
 ├─ firestore.indexes.json
