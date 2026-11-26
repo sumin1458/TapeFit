@@ -30,7 +30,7 @@ class Review {
     return Review(
       status: m['status'] as String? ?? 'pending',
       reviewer: m['reviewer'] as String? ?? '',
-      reviewedAt: at == null ? null : at.toString(),
+      reviewedAt: at?.toString(),
     );
   }
 

@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import '../domain/guide_repository.dart';
 
@@ -33,7 +34,7 @@ class FirestoreFavoriteRepository implements FavoriteRepository {
   }
 }
 
-/// Firebase를 쓸 수 없을 때 메모리에만 보관한다 (앱 종료 시 사라짐).
+/// Firebase를 쓸 수 없을 때 메모리에만 보관한다 (테스트·기본값용).
 class LocalFavoriteRepository implements FavoriteRepository {
   final Set<String> _ids = {};
 
@@ -43,5 +44,24 @@ class LocalFavoriteRepository implements FavoriteRepository {
   @override
   Future<void> setFavorite(String symptomId, bool value) async {
     value ? _ids.add(symptomId) : _ids.remove(symptomId);
+  }
+}
+
+/// Firebase를 쓸 수 없을 때 기기(SharedPreferences)에 저장해 앱을 다시 켜도 유지한다.
+class PersistentFavoriteRepository implements FavoriteRepository {
+  static const storageKey = 'favorite_symptom_ids';
+
+  @override
+  Future<Set<String>> loadFavorites() async {
+    final prefs = await SharedPreferences.getInstance();
+    return (prefs.getStringList(storageKey) ?? const <String>[]).toSet();
+  }
+
+  @override
+  Future<void> setFavorite(String symptomId, bool value) async {
+    final prefs = await SharedPreferences.getInstance();
+    final ids = (prefs.getStringList(storageKey) ?? const <String>[]).toSet();
+    value ? ids.add(symptomId) : ids.remove(symptomId);
+    await prefs.setStringList(storageKey, ids.toList());
   }
 }
