@@ -13,7 +13,7 @@
 | 알고 싶은 것 | 위치 |
 |---|---|
 | 무엇을 만들고 무엇을 검증하나 (요구사항 ID) | 1장 |
-| 기술 스택, Firebase 서비스 구성과 무료 호스팅 선택 이유 | 2장 |
+| 기술 스택, Firebase 서비스 구성과 무료 플랜 선택 이유 | 2장 |
 | 구성요소와 각자의 책임 | 3장 |
 | 입력부터 결과까지의 흐름 | 4장 |
 | 데이터 저장 구조 (Firestore) | 5장 |
@@ -46,7 +46,6 @@
 | 안전 | Remote Config로 문제 콘텐츠를 즉시 숨기는 스위치 | P1 |
 | 즐겨찾기 | 익명 로그인 + Firestore 저장 | P1 |
 | 측정 | Analytics 이벤트로 PRD 성공 지표(완료율) 기록 | P1 |
-| 배포 | Flutter Web을 Hosting에 올린 심사용 데모 URL | P1 |
 | 해커톤 이후 | 부위 선택 화면, 무릎·손목·어깨·허리, 3D, 음성, 근처 병원 안내 | P2 |
 | 제외 | 이메일·소셜 로그인, 사용자 정보 수집, 자체 서버, Cloud Functions, 진단 기능 | — |
 
@@ -82,7 +81,7 @@
 |---|---|---|
 | 클라이언트 | Flutter | PRD 확정. Android/iOS 단일 코드베이스, 웹 빌드도 가능 |
 | 상태관리·라우팅 | Riverpod, go_router | 테스트가 쉽고 화면 ①~④ 흐름과 대응 |
-| 백엔드 | **Firebase Spark(무료) 플랜** | Flutter 공식 SDK(FlutterFire), 카드 등록 불필요, 서버 코드 없이 DB·인증·원격 설정·호스팅을 한 곳에서 제공 |
+| 백엔드 | **Firebase Spark(무료) 플랜** | Flutter 공식 SDK(FlutterFire), 카드 등록 불필요, 서버 코드 없이 DB·인증·원격 설정을 한 곳에서 제공 |
 | 협업 | GitHub | PRD 확정 |
 
 ### 2.2 Firebase 서비스별 역할
@@ -90,7 +89,6 @@
 | 서비스 | 용도 | 우선순위 | 비고 |
 |---|---|---|---|
 | **Cloud Firestore** | 가이드·출처·공통 문구 저장과 읽기, 즐겨찾기 저장 | P0 | 모바일은 오프라인 캐시가 기본 제공된다 (웹은 별도 설정 필요) |
-| **Firebase Hosting** | Flutter Web 심사용 데모 URL | P1 | 정적 파일 호스팅 |
 | **Remote Config** | `guidesEnabled`(노출 스위치), `minContentVersion` | P1 | FR-10 |
 | **Authentication (익명)** | 즐겨찾기를 기기별로 분리·복원하기 위한 익명 UID | P1 | 이메일·전화번호 수집 없음 |
 | **Analytics** | 완료율 계산용 이벤트 | P1 | 개인정보 미포함 |
@@ -103,7 +101,7 @@
 
 | 후보 | 장점 | 단점 | 판단 |
 |---|---|---|---|
-| **Firebase Spark** | Flutter 1급 지원, 모바일 오프라인 캐시 내장, 설정이 빠르고 규칙으로 보안을 선언, 호스팅·원격 설정까지 통합 | NoSQL(본 서비스는 조인이 필요 없어 무관), 벤더 종속 | **채택** |
+| **Firebase Spark** | Flutter 1급 지원, 모바일 오프라인 캐시 내장, 설정이 빠르고 규칙으로 보안을 선언, 원격 설정까지 통합 | NoSQL(본 서비스는 조인이 필요 없어 무관), 벤더 종속 | **채택** |
 | Supabase(무료) | SQL, 오픈소스 | 무료 프로젝트가 비활성 시 일시중지될 수 있어 시연 중 장애 위험, 오프라인 캐시는 직접 구현 | 차선 |
 | Cloudflare Pages + D1 | 빠른 CDN | 모바일 SDK 없음, API를 직접 구현해야 함 | 웹 전용일 때만 |
 | Vercel/Netlify + 외부 DB | 웹 배포가 쉽다 | DB를 따로 붙여야 하고 모바일 앱에 이점이 적다 | 비추천 |
@@ -116,7 +114,7 @@
 | 쓰기 횟수 | 앱의 쓰기는 즐겨찾기 토글뿐이다 |
 | 저장 용량 | 가이드는 문서당 수 KB로 무료 저장 한도에 한참 못 미친다 |
 | 과금 방지 | Blaze 플랜으로 올리지 않고 결제 수단을 등록하지 않는다. Firebase 콘솔의 사용량 알림을 켠다 |
-| 대략적 한도(확인 필요) | Firestore는 일 단위 읽기·쓰기 무료 할당량과 1GiB 저장, Hosting은 수 GB 저장·일 단위 전송 무료 할당량이 있다. 정확한 수치는 도입 시점에 공식 문서로 확인한다 |
+| 대략적 한도(확인 필요) | Firestore는 일 단위 읽기·쓰기 무료 할당량과 1GiB 저장 무료 할당량이 있다. 정확한 수치는 도입 시점에 공식 문서로 확인한다 |
 
 ---
 
@@ -169,15 +167,13 @@ flowchart TB
     subgraph Firebase[Firebase Spark]
         FS
         RC[Remote Config]
-        H[Hosting: Flutter Web]
         AU[Auth 익명]
         AN[Analytics]
     end
-    APP[Flutter 앱 Android/iOS/Web] <--> FS
+    APP[Flutter 앱 Android/iOS] <--> FS
     APP --> RC
     APP --> AU
     APP --> AN
-    H --> APP
 ```
 
 콘텐츠의 **원본은 Git의 JSON**이고 Firestore는 배포 대상이다. 검수 결과는 JSON을 수정해 PR로 검토한 뒤 업로드하므로 이력이 남고, Firebase를 다시 만들어도 복원할 수 있다.
@@ -523,7 +519,7 @@ TapeFit/
 │  └─ rules/firestore.rules.test.mjs     # T-14~T-16
 ├─ firestore.rules                       # 5.4절
 ├─ firestore.indexes.json
-├─ firebase.json, .firebaserc            # Hosting, Firestore, 에뮬레이터 설정
+├─ firebase.json, .firebaserc            # Firestore, 에뮬레이터 설정
 └─ pubspec.yaml
 ```
 
@@ -543,16 +539,16 @@ TapeFit/
 | 1일차 오전 | Flutter 프로젝트, 모델·검증·Repository(Firestore + 번들 폴백) | 송수민, 장아영 | T-01~T-04, T-11 통과 |
 | 1일차 오후 | ① 증상 선택, ② 안전 체크, ③ 단계별 가이드(출처·당김 강도·그림) | 오준혁, 송수민 | PRD 완료 조건 ①~③ (T-05~T-07) |
 | 2일차 오전 | ④ 완료 화면, 전체 흐름 점검 → 통과 후 디자인, P1(즐겨찾기·원격 스위치·이벤트) | 장아영, 오준혁 | T-08~T-10, T-17, T-18 |
-| 2일차 오후 | 사용자 테스트, 수정, Hosting 배포(P1), APK 빌드, 발표 준비 | 전원 | 최소 시연 기준 충족, T-20~T-24 |
+| 2일차 오후 | 사용자 테스트, 수정, APK 빌드, 발표 준비 | 전원 | 최소 시연 기준 충족, T-20~T-24 |
 
-Firebase 설정은 첫 연동에서 시간을 잃기 쉬우므로 **해커톤 전에 미리** 끝내는 것을 전제로 한다. 일정이 밀리면 **Hosting → Analytics → 즐겨찾기 → Remote Config → 디자인 개선** 순으로 제외하고, P0(Firestore 읽기 + 번들 폴백으로 ①~④ 흐름)만 유지한다.
+Firebase 설정은 첫 연동에서 시간을 잃기 쉬우므로 **해커톤 전에 미리** 끝내는 것을 전제로 한다. 일정이 밀리면 **Analytics → 즐겨찾기 → Remote Config → 디자인 개선** 순으로 제외하고, P0(Firestore 읽기 + 번들 폴백으로 ①~④ 흐름)만 유지한다.
 
 ### 11.2 이후 로드맵
 
 | 단계 | 기술 작업 |
 |---|---|
 | Phase 2 | 무릎·손목 등 문서 추가(앱 코드 수정 없음), 부위 선택 화면, 관리자용 콘텐츠 검수 워크플로 개선 |
-| Phase 3 | 3D·음성 가이드, 근처 병원 안내(지도 API 검토). 이미지 호스팅이 필요하면 Hosting 정적 파일 또는 유료 전환 여부를 검토 |
+| Phase 3 | 3D·음성 가이드, 근처 병원 안내(지도 API 검토). 이미지 호스팅이 필요하면 유료 전환 여부를 검토 |
 | 운영 | 사용량·오류 모니터링, 로그인이 필요해지면 계정 연동으로 즐겨찾기 이전 |
 
 ### 11.3 위험과 대응

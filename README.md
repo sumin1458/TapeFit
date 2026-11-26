@@ -5,7 +5,7 @@
 ## 실행
 
 ```bash
-flutter create . --platforms=android,ios,web   # 최초 1회: 플랫폼 폴더 생성 (기존 lib/pubspec은 유지)
+flutter create . --platforms=android,ios   # 최초 1회: 플랫폼 폴더 생성 (기존 lib/pubspec은 유지)
 flutter pub get
 flutter run
 ```
