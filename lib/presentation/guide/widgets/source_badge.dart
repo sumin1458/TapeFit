@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 
+import 'package:url_launcher/url_launcher.dart';
+
 import '../../../domain/guide_models.dart';
 
-/// 출처 ID 칩 목록. 출처가 없으면 "송수민 검수 전" 안내를 대신 보여 준다.
+/// 출처 ID 칩 목록. 칩을 누르면 출처 링크를 연다(링크가 없으면 출처 설명을 보여 준다).
 class SourceBadge extends StatelessWidget {
   const SourceBadge({super.key, required this.sources, required this.references});
   final List<String> sources;
@@ -19,14 +21,26 @@ class SourceBadge extends StatelessWidget {
         for (final id in sources)
           Tooltip(
             message: references[id]?.title ?? id,
-            child: Chip(
+            child: ActionChip(
               label: Text(id, style: const TextStyle(fontSize: 11)),
               visualDensity: VisualDensity.compact,
               padding: EdgeInsets.zero,
+              onPressed: () => _open(context, references[id], id),
             ),
           ),
       ],
     );
+  }
+
+  Future<void> _open(BuildContext context, Reference? ref, String id) async {
+    final messenger = ScaffoldMessenger.of(context);
+    final uri = ref == null ? null : Uri.tryParse(ref.url);
+    if (uri == null || !ref!.url.startsWith('https://')) {
+      messenger.showSnackBar(SnackBar(content: Text(ref?.title ?? id)));
+      return;
+    }
+    final ok = await launchUrl(uri, mode: LaunchMode.externalApplication);
+    if (!ok) messenger.showSnackBar(const SnackBar(content: Text('링크를 열 수 없어요.')));
   }
 }
 
@@ -36,6 +50,7 @@ class ReviewBadge extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    if (!review.verified) return const SizedBox.shrink();
     final color = review.verified ? Colors.green.shade700 : Colors.orange.shade800;
     return Row(mainAxisSize: MainAxisSize.min, children: [
       Icon(review.verified ? Icons.verified : Icons.pending_outlined, size: 16, color: color),
