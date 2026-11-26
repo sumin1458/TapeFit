@@ -73,8 +73,8 @@ const Map<String, dynamic> bundledGuideContent = {
           'sources': ['S3', 'S5'],
           'tape': [
             [
-              [80, 96],
-              [130, 96],
+              [80, 122],
+              [130, 122],
             ],
           ],
         },
@@ -86,13 +86,13 @@ const Map<String, dynamic> bundledGuideContent = {
           'sources': ['S3', 'S5'],
           'tape': [
             [
-              [82, 96],
+              [82, 122],
               [82, 150],
               [86, 190],
               [105, 206],
               [124, 190],
               [128, 150],
-              [128, 96],
+              [128, 122],
             ],
           ],
         },
@@ -119,12 +119,12 @@ const Map<String, dynamic> bundledGuideContent = {
           'sources': ['S3'],
           'tape': [
             [
-              [80, 90],
-              [130, 90],
+              [80, 116],
+              [130, 116],
             ],
             [
-              [80, 102],
-              [130, 102],
+              [80, 128],
+              [130, 128],
             ],
           ],
         },

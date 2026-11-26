@@ -38,7 +38,7 @@ class _TapePainter extends CustomPainter {
       ..color = const Color(0xFFC9A98C)
       ..style = PaintingStyle.stroke
       ..strokeWidth = 1.5;
-    final leg = RRect.fromRectAndRadius(const Rect.fromLTWH(68, 10, 74, 150), const Radius.circular(20));
+    final leg = RRect.fromRectAndRadius(const Rect.fromLTWH(68, 60, 74, 100), const Radius.circular(20));
     final foot = RRect.fromRectAndRadius(const Rect.fromLTWH(60, 150, 130, 68), const Radius.circular(32));
     for (final s in [leg, foot]) {
       canvas.drawRRect(s, skin);

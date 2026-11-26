@@ -42,11 +42,11 @@ class TapeStrip {
   final bool underwrap;
 }
 
-const double legTop = 36;
+const double legTop = 24;
 const double soleY = -9;
 
 const _legRadius = <List<double>>[
-  [-2, 3.4], [3, 3.3], [10, 3.7], [22, 5.4], [30, 5.6], [legTop, 5.0],
+  [-2, 3.4], [3, 3.3], [10, 3.7], [17, 4.4], [legTop, 4.9],
 ];
 
 // t: 0 = 뒤꿈치 뒤쪽, 1 = 발끝. [t, 반폭, 윗면 높이]
@@ -164,13 +164,13 @@ List<TapeStrip> tapeStripsForStep(int index) {
     case 0:
       return [_underwrap()];
     case 1:
-      return [_ring(16, 2.8)];
+      return [_ring(11, 2.8)];
     case 2:
       return [_stirrup()];
     case 3:
       return [_horseshoe()];
     case 4:
-      return [_ring(18.5, 2.8), _ring(13.5, 2.8)];
+      return [_ring(13, 2.8), _ring(9.5, 2.8)];
     default:
       return const [];
   }
@@ -190,14 +190,14 @@ TapeStrip _underwrap() {
   const n = turns * perTurn;
   return TapeStrip([
     for (var i = 0; i <= n; i++)
-      legPoint(2 + 16 * i / n, 2 * math.pi * i / perTurn, off: 0.15),
+      legPoint(1 + 11 * i / n, 2 * math.pi * i / perTurn, off: 0.15),
   ], 3.2, underwrap: true);
 }
 
 TapeStrip _stirrup() {
   const t0 = 0.19;
   final pts = <SurfacePoint>[];
-  for (var y = 16.0; y >= 0; y -= 2) {
+  for (var y = 11.0; y >= 0; y -= 2) {
     pts.add(legPoint(y, math.pi / 2, off: _off));
   }
   const arc = 14;
@@ -205,7 +205,7 @@ TapeStrip _stirrup() {
   for (var i = 0; i <= arc; i++) {
     pts.add(footPoint(t0, phiStart + (phiEnd - phiStart) * i / arc, off: _off));
   }
-  for (var y = 0.0; y <= 16; y += 2) {
+  for (var y = 0.0; y <= 11; y += 2) {
     pts.add(legPoint(y, -math.pi / 2, off: _off));
   }
   return TapeStrip(pts, 2.6);
