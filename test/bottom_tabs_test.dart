@@ -24,10 +24,10 @@ void main() {
 
     expect(find.byType(NavigationDestination), findsNWidgets(6));
 
-    await tester.tap(find.text('테이핑 소개'));
+    await tester.tap(find.text('스토어'));
     await tester.pumpAndSettle();
-    expect(find.text('키네시오 테이프 (탄성 테이프)'), findsOneWidget);
-    expect(find.text('Y자 테이프'), findsOneWidget);
+    expect(find.text('쿠팡'), findsWidgets);
+    expect(find.text('키네시오 테이프(탄성 테이프)'), findsOneWidget);
     await tester.tap(find.text('AI검사'));
     await tester.pumpAndSettle();
     expect(find.text('추후 업데이트 예정'), findsOneWidget);
@@ -35,6 +35,13 @@ void main() {
     await tester.tap(find.text('더보기'));
     await tester.pumpAndSettle();
     expect(find.text('이용 안내'), findsOneWidget);
+    expect(find.text('콘텐츠 상태'), findsNothing);
+    await tester.tap(find.byKey(const ValueKey('open-intro')));
+    await tester.pumpAndSettle();
+    expect(find.text('키네시오 테이프 (탄성 테이프)'), findsOneWidget);
+    expect(find.text('Y자 테이프'), findsOneWidget);
+    await tester.pageBack();
+    await tester.pumpAndSettle();
 
     await tester.tap(find.text('MY'));
     await tester.pumpAndSettle();

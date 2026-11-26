@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 
-import '../../app/nav_bar.dart';
 import '../../data/tape_knowledge.dart';
 
 /// 테이핑 소개 탭: 테이프 종류와 자르는 모양별 쓰임새(출처 표시).
@@ -12,7 +11,6 @@ class TapeIntroScreen extends StatelessWidget {
     final t = Theme.of(context).textTheme;
     return Scaffold(
       appBar: AppBar(title: const Text('테이핑 소개')),
-      bottomNavigationBar: const TapeFitNavBar(index: 3),
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: [

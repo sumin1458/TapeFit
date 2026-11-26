@@ -11,6 +11,7 @@ import '../presentation/intro/tape_intro_screen.dart';
 import '../presentation/more/more_screen.dart';
 import '../presentation/my/my_screen.dart';
 import '../presentation/safety/safety_check_screen.dart';
+import '../presentation/store/store_screen.dart';
 
 final appRouter = GoRouter(
   routes: [
@@ -19,6 +20,7 @@ final appRouter = GoRouter(
     GoRoute(path: '/ai-preview', builder: (_, __) => const AiCheckScreen()),
     GoRoute(path: '/favorites', builder: (_, __) => const FavoritesScreen()),
     GoRoute(path: '/more', builder: (_, __) => const MoreScreen()),
+    GoRoute(path: '/store', builder: (_, __) => const StoreScreen()),
     GoRoute(path: '/intro', builder: (_, __) => const TapeIntroScreen()),
     GoRoute(path: '/glossary', builder: (_, __) => const GlossaryScreen()),
     GoRoute(path: '/my', builder: (_, __) => const MyScreen()),
