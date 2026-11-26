@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 
 import '../../app/nav_bar.dart';
 import '../../application/guide_providers.dart';
@@ -17,6 +18,16 @@ class MoreScreen extends ConsumerWidget {
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: [
+          Card(
+            child: ListTile(
+              key: const ValueKey('open-glossary'),
+              leading: const Icon(Icons.search),
+              title: const Text('테이핑 용어 사전'),
+              subtitle: const Text('앵커·스터럽·장력 같은 용어를 출처와 함께 찾아봐요.'),
+              trailing: const Icon(Icons.chevron_right),
+              onTap: () => context.push('/glossary'),
+            ),
+          ),
           Card(
             child: ListTile(
               leading: const Icon(Icons.health_and_safety_outlined),

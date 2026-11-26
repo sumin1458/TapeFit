@@ -5,6 +5,8 @@ import '../presentation/complete/complete_screen.dart';
 import '../presentation/favorites/favorites_screen.dart';
 import '../presentation/guide/step_guide_screen.dart';
 import '../presentation/home/home_screen.dart';
+import '../presentation/more/glossary_screen.dart';
+import '../presentation/intro/tape_intro_screen.dart';
 import '../presentation/more/more_screen.dart';
 import '../presentation/my/my_screen.dart';
 import '../presentation/safety/safety_check_screen.dart';
@@ -15,6 +17,8 @@ final appRouter = GoRouter(
     GoRoute(path: '/ai', builder: (_, __) => const AiCheckScreen()),
     GoRoute(path: '/favorites', builder: (_, __) => const FavoritesScreen()),
     GoRoute(path: '/more', builder: (_, __) => const MoreScreen()),
+    GoRoute(path: '/intro', builder: (_, __) => const TapeIntroScreen()),
+    GoRoute(path: '/glossary', builder: (_, __) => const GlossaryScreen()),
     GoRoute(path: '/my', builder: (_, __) => const MyScreen()),
     GoRoute(
       path: '/safety/:id',

@@ -10,7 +10,7 @@ class MyScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: const Text('MY')),
-      bottomNavigationBar: const TapeFitNavBar(index: 4),
+      bottomNavigationBar: const TapeFitNavBar(index: 5),
       body: const Center(
         child: Padding(
           padding: EdgeInsets.all(24),

@@ -22,8 +22,12 @@ void main() {
     ));
     await tester.pumpAndSettle();
 
-    expect(find.byType(NavigationDestination), findsNWidgets(5));
+    expect(find.byType(NavigationDestination), findsNWidgets(6));
 
+    await tester.tap(find.text('테이핑 소개'));
+    await tester.pumpAndSettle();
+    expect(find.text('키네시오 테이프 (탄성 테이프)'), findsOneWidget);
+    expect(find.text('Y자 테이프'), findsOneWidget);
     await tester.tap(find.text('AI검사'));
     await tester.pumpAndSettle();
     expect(find.textContaining('AI 코치 (기기 안 가상 AI)'), findsOneWidget);
