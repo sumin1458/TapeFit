@@ -42,7 +42,7 @@ class TapeFitApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp.router(
-      title: '테이프핏',
+      title: 'TapeFit',
       debugShowCheckedModeBanner: false,
       theme: buildTheme(),
       routerConfig: appRouter,

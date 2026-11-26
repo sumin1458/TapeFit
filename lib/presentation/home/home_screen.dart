@@ -23,7 +23,7 @@ class HomeScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final catalog = ref.watch(catalogProvider);
     return Scaffold(
-      appBar: AppBar(title: const Text('테이프핏')),
+      appBar: AppBar(title: const Text('TapeFit')),
       bottomNavigationBar: const TapeFitNavBar(index: 0),
       body: catalog.when(
         loading: () => const Center(child: CircularProgressIndicator()),
