@@ -97,7 +97,7 @@
 | 테이프 도식, 주의사항, 즐겨찾기(메모리) | 구현됨 | `tape_diagram.dart`, `guide_providers.dart` |
 | 출처 목록(글자 링크)과 검수 상태 배지 표시 | 구현됨 (단계·주의사항 아래, 링크 없는 출처는 설명만) | `source_badge.dart`, T-31 |
 | 콘텐츠 검증(13개 오류 코드, Dart·Node 동일 규칙) | 구현됨 | `validation.dart`, `validate_content.mjs`, T-25 |
-| 번들 JSON 폴백, 원격 실패 시 폴백 | 구현됨 | `fallback_guide_source.dart` |
+| 번들 JSON 폴백, 원격 실패 시 폴백 | 구현됨 (번들은 `guide_content.dart` 상수, JSON과 일치를 T-35가 검사) | `fallback_guide_source.dart`, `guide_content.dart` |
 | Firestore 연결 | 코드는 있으나 Firebase 프로젝트 미설정(실서버 검증 안 함) | `firebase_options.dart`는 자리표시자 |
 | 시작 초기화 흐름(4.1), 설정 정책(`config_service`) | **이번 범위 제외**, 후속 구현 | 11.1 P0-5 |
 | 즐겨찾기 영구 저장(Firestore) | **이번 범위 제외**, 현재는 메모리 저장 | 11.1 |
@@ -444,7 +444,7 @@ service cloud.firestore {
 |---|---|
 | 모바일 | Firestore 오프라인 캐시를 사용한다. 한 번 읽은 가이드는 오프라인에서도 열린다 |
 | 웹 | 영속 캐시를 명시적으로 켠다. 지원되지 않는 브라우저는 번들 폴백을 쓴다 |
-| 첫 실행이 오프라인 | 앱에 포함한 최소 데이터(`assets/fallback/guides.json`, 발목 가이드 1건)로 동작한다. 이 데이터는 업로드 전에 Git 원본에서 복사한다 |
+| 첫 실행이 오프라인 | 앱에 포함한 최소 데이터(발목 가이드 1건)로 동작한다. 이 데이터는 `lib/data/guide_content.dart`(Dart 상수)에 있고, `content/guides.json`·`assets/fallback/guides.json`과 같은 내용이어야 하며 T-35가 일치를 검사한다 |
 | 오래된 캐시·설정 조회 실패 | 4.1절 정책을 따른다 (버전 비교, 번들로 후퇴, 점검 화면) |
 | 즐겨찾기 오프라인 | 로컬에 쌓았다가 온라인이 되면 Firestore가 동기화한다 |
 
@@ -620,6 +620,9 @@ Firebase 로컬 에뮬레이터(Firestore, Auth)로 규칙과 저장소 동작�
 | T-32 | 가이드 로드 실패 시 안내 문구와 다시 시도 버튼이 나온다 | NFR-02 | 위젯 | 문구·버튼 표시 |
 | T-33 | 없는 가이드 ID로 접근하면 "찾을 수 없어요" 안내가 나온다 | NFR-02 | 위젯 | 안내 표시 |
 | T-34 | 홈에 면책 문구가 보이고 준비 중 부위가 표시된다 | FR-07 | 위젯 | 문구 표시 |
+| T-35 | Dart 번들 콘텐츠(`lib/data/guide_content.dart`)가 `content/guides.json`, `assets/fallback/guides.json`과 같다 | FR-05, NFR-03 | 단위 | 세 파일 일치 |
+| T-36 | 번들 콘텐츠가 5단계이고 단계명·출처가 PRD와 일치한다 | FR-05 | 단위 | 5단계, 단계명 일치 |
+| T-37 | 번들 콘텐츠가 검증 규칙(`validateBundle`)을 통과한다 | NFR-03 | 단위 | 오류 0건 |
 ### 8.1 실행 결과 기록
 
 위 계획은 **설계이며, 아래 표가 채워지기 전까지 통과로 간주하지 않는다.** 실행할 때마다 날짜·환경·결과를 기록한다.
@@ -629,7 +632,8 @@ Firebase 로컬 에뮬레이터(Firestore, Auth)로 규칙과 저장소 동작�
 | 규칙 테스트 | T-14~T-16, T-30 | (미실행) | Firebase 에뮬레이터 | — |
 | 콘텐츠 검증 스크립트 | `tool/validate_content.mjs` (T-25의 Node 쪽) | 2026-11-27 | Node v26.13.1, Windows | 통과 ("콘텐츠 검증 통과") |
 | 정적 분석 | 전체 코드 | 2026-11-27 | Flutter 3.50.1 / Dart 3.14.0, `flutter analyze` | 오류 0건, 안내(info) 14건 (8.3 참고) |
-| 위젯 (화면) | `test/widget_screens_test.dart` 4건: T-31~T-34 | 2026-11-27 | `flutter test` | 4건 모두 통과 (전체 `flutter test` 27건 통과) |
+| 위젯 (화면) | `test/widget_screens_test.dart` 4건: T-31~T-34 | 2026-11-27 | `flutter test` | 4건 모두 통과 |
+| 번들 콘텐츠 | `test/bundled_content_test.dart` 3건: T-35~T-37 | 2026-11-27 | `flutter test` | 3건 모두 통과 (전체 `flutter test` 30건 통과) |
 | 웹 빌드·수동 확인 | `flutter build web --release` 후 브라우저에서 홈·단계 가이드 확인 | 2026-11-27 | Flutter 3.50.1, Windows, 로컬 웹 서버 | 빌드 성공, 출처 링크·검수 배지·인체 아이콘 표시 확인 (실기기 아님) |
 | 단위 (최초 실행) | `test/validation_test.dart` 4건: 콘텐츠 원본 검증 통과, 발목 5단계·출처, 없는 출처 참조 오류, `published=false` 제외 | 2026-11-27 | `flutter test` | 4건 모두 통과 |
 | 단위 T-25 (Dart) | `test/validation_test.dart` 23건: 위 4건 + 버전 비교 + 잘못된 데이터 18건이 기대한 오류 코드로 거부됨 | 2026-11-27 | `flutter test` | 23건 모두 통과 |
@@ -710,7 +714,8 @@ TapeFit/
 │  │  └─ guide_repository.dart           # abstract GuideRepository (6.1절)
 │  ├─ data/
 │  │  ├─ firestore_guide_repository.dart # 캐시 우선 조회, 번들 폴백
-│  │  ├─ fallback_guide_source.dart      # assets/fallback 로더
+│  │  ├─ fallback_guide_source.dart      # 번들 콘텐츠 로더
+│  │  ├─ guide_content.dart              # 번들 가이드 콘텐츠(Dart 상수, JSON과 동일)
 │  │  ├─ favorite_repository.dart        # users/{uid}/favorites
 │  │  ├─ auth_service.dart               # 익명 로그인
 │  │  ├─ config_service.dart             # Remote Config

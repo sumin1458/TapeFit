@@ -10,10 +10,11 @@
 /// node tool/validate_content.mjs                # 콘텐츠 검증
 /// node --test tool/validate_content.test.mjs    # Node 검증 테스트 19건
 /// flutter analyze                               # 오류 0건 (안내 14건)
-/// flutter test                                  # 27건 통과 (2026-11-27, TRD 8.1)
+/// flutter test                                  # 30건 통과 (2026-11-27, TRD 8.1)
 /// ```
 ///
-/// ## 콘텐츠 (`content/guides.json` = `assets/fallback/guides.json`)
+/// ## 콘텐츠 (`lib/data/guide_content.dart` = `content/guides.json` = `assets/fallback/guides.json`)
+/// 앱은 `guide_content.dart` 상수를 번들 폴백으로 쓰고, 세 파일의 일치는 T-35가 검사한다.
 /// 가이드 `ankle_instability` (발목 불안정감, 리지드 테이프 + 언더랩), 5단계:
 /// 1. 피부 준비 (출처 S3) 2. 앵커 (S3, S5) 3. 스터럽 (S3, S5)
 /// 4. 호스슈 (S3) 5. 마무리 확인 (S3).
