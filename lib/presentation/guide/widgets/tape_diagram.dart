@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../../core/validation.dart';
 import '../../../domain/guide_models.dart';
 
 /// 발목 옆면 도식 위에 테이프 줄을 그린다. 좌표계는 PRD 6-1 (약 210 x 230).
@@ -53,7 +54,7 @@ class _TapePainter extends CustomPainter {
         ..strokeCap = StrokeCap.round
         ..strokeJoin = StrokeJoin.round;
       for (final line in steps[i].tape) {
-        if (line.length < 2) continue;
+        if (line.length < 2 || !tapeIsValid(steps[i])) continue;
         final path = Path()..moveTo(line.first[0], line.first[1]);
         for (final p in line.skip(1)) {
           path.lineTo(p[0], p[1]);

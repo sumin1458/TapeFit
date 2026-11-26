@@ -1,0 +1,12 @@
+[
+  { "name": "단계 order 중복", "set": { "guides.0.steps.1.order": 1 } },
+  { "name": "단계 order 누락(6번)", "set": { "guides.0.steps.4.order": 6 } },
+  { "name": "단계 출처 없음", "set": { "guides.0.steps.0.sources": [] } },
+  { "name": "끊어진 출처 참조", "set": { "guides.0.steps.1.sources": ["S9"] } },
+  { "name": "중복 출처", "set": { "guides.0.sources": ["S3", "S3"] } },
+  { "name": "가이드 출처 없음", "set": { "guides.0.sources": [] } },
+  { "name": "tape 좌표 범위 밖", "set": { "guides.0.steps.1.tape": [[[80, 96], [999, 96]]] } },
+  { "name": "tape 점 1개", "set": { "guides.0.steps.1.tape": [[[80, 96]]] } },
+  { "name": "버전 형식 오류", "set": { "meta.contentVersion": "v1" } },
+  { "name": "존재하지 않는 bodyPartId", "set": { "guides.0.bodyPartId": "elbow" } }
+]

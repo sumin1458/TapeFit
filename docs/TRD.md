@@ -1,4 +1,4 @@
-# TapeFit (테이프핏) — TRD (기술 요구사항 문서, Firebase 기반)
+﻿# TapeFit (테이프핏) — TRD (기술 요구사항 문서, Firebase 기반)
 
 | 항목 | 내용 |
 |---|---|
@@ -60,7 +60,7 @@
 | FR-05 | (P1) ☆로 즐겨찾기를 저장하고, 앱을 다시 켜도 목록에서 다시 연다 | 5장 |
 | FR-06 | 가이드마다 출처 목록과 검수 상태(검수 전 / 검수 완료 + 일자)를 표시한다 | 4장 차별점 |
 | FR-07 | 면책 문구("진단·치료 대체 아님, 심하면 진료")를 가이드 화면에 항상 표시한다 | 6장 |
-| FR-08 | 출처·검수 정보가 없는 가이드는 화면에 노출하지 않는다 | 4장 콘텐츠 검수 기준 |
+| FR-08 | 출처·검수 정보가 없거나, 단계가 계약(6.2절: 5단계, 1부터 연속·중복 없는 순서)에 맞지 않거나, 출처 참조가 끊어진 가이드는 화면에 노출하지 않는다 | 4장 콘텐츠 검수 기준 |
 | FR-09 | 검수 전 항목은 보수적 문구와 "검수 전" 표시로 보여 준다 (호스슈 위치, "하루 이내 제거" 단정 금지) | 4-1 |
 | FR-10 | (P1) 원격 스위치로 가이드 노출을 즉시 중단하고 점검 안내를 보여 준다 | 6장 안전 |
 | FR-11 | (P1) 시작·안전 체크 통과·완료 이벤트를 기록해 완료율을 계산할 수 있다 | 5-1 성공 기준 |
@@ -70,6 +70,14 @@
 | NFR-04 | 이름·연락처·건강 상태 등 개인·건강정보를 수집하지 않는다. 식별자는 익명 UID뿐이다 | 본 TRD |
 | NFR-05 | 콘텐츠를 Firestore 데이터만 바꿔 갱신하고, 부위 추가에 앱 코드 수정이 필요 없다 | 5장 중장기 |
 | NFR-06 | 쓰기는 관리자 경로로만 가능하고, 앱은 가이드 데이터를 읽기만 한다 | 본 TRD |
+
+### 1.4 PRD와의 차이와 결정 기록
+
+| 항목 | PRD | 본 TRD | 상태 |
+|---|---|---|---|
+| 콘텐츠 저장 | 5장 "로컬 JSON, Firebase는 추후" | MVP부터 Firestore, 번들 JSON은 첫 실행 오프라인용 폴백만 | **팀 승인 필요**. 승인 시 PRD 5장 "사용 기술"을 같은 PR에서 수정한다 (이 PR에 수정안 포함) |
+
+팀 합의는 이 문서만으로 증명되지 않으므로, PR 리뷰의 승인 기록을 합의 근거로 삼는다. 승인되지 않으면 PRD 원안(번들 JSON)으로 돌아가며, 이때도 `GuideRepository` 계약이 같아 앱 코드 변경은 저장소 구현 하나로 한정된다.
 
 ---
 
@@ -203,7 +211,7 @@ stateDiagram-v2
 | 순서 | 단계 | 내용 | 담당 |
 |---|---|---|---|
 | 1 | 입력 | 앱 실행 | Screens |
-| 2 | 설정 확인 | Remote Config에서 `guidesEnabled` 확인 (실패 시 기본값 `true`가 아니라 **마지막 성공 값**, 없으면 `true`) | ConfigService |
+| 2 | 설정 확인 | Remote Config에서 `guidesEnabled`, `minContentVersion` 확인. 실패 시 4.1절 정책을 따른다 (기본값 `true`로 열지 않는다) | ConfigService |
 | 3 | 로드 | `meta/app`의 `contentVersion`을 확인하고, 같으면 캐시를, 다르면 서버에서 `bodyParts`, `guides`, `references`를 읽는다. 실패하면 캐시 → 번들 순 폴백 | GuideRepository |
 | 4 | 검증 | 증상마다 `sources`, `review`, `steps`, `cautions` 확인. 부적합 증상은 제외하고 사유를 기록 | GuideValidator |
 | 5 | 상태 반영 | 통과 데이터를 로딩/성공/오류 상태로 노출 | Providers |
@@ -235,6 +243,23 @@ sequenceDiagram
     P-->>S: 성공 / 점검 / 오류 상태
     S-->>U: 가이드 표시 또는 안내 메시지
 ```
+
+### 4.1 콘텐츠 버전과 설정 실패 정책 (안전하게 실패)
+
+**버전 형식과 비교**: `contentVersion`, `minContentVersion`은 `연.월.일련번호`(예: `2026.11.1`) 형식이다. 점(`.`)으로 나눈 세 정수를 **앞 칸부터 숫자로** 비교한다 (`2026.11.10` > `2026.11.2`). 형식이 틀리면 해당 값은 사용할 수 없는 값으로 보고 그 콘텐츠를 거부한다. 비교 대상은 "앱 빌드"가 아니라 **화면에 쓰려는 콘텐츠 본체**의 `contentVersion`이다.
+
+**사용할 콘텐츠 선택**: 원격·캐시·번들 후보 중 (1) 검증을 통과하고 (2) `minContentVersion` 이상인 것만 후보로 두고, 그중 버전이 가장 높은 것을 쓴다. 후보가 없으면 점검 화면을 보여 준다. 번들은 빌드 시점에 검증·고정된 버전이다.
+
+| 상황 | 동작 |
+|---|---|
+| `guidesEnabled` 조회 성공 | 그 값을 저장하고 사용 |
+| 조회 실패, 마지막 성공 값이 24시간 이내 | 마지막 성공 값 사용 |
+| 조회 실패, 마지막 성공 값이 `false` | 만료와 관계없이 `false` 유지 (조회에 성공해 `true`를 받을 때까지 차단) |
+| 조회 실패, 값이 없거나 24시간 초과(마지막 값이 `true`) | "상태 미확인". **번들 콘텐츠만** 허용하고 서버·캐시의 더 새로운 콘텐츠는 쓰지 않는다. "최신 상태를 확인하지 못했어요" 안내를 표시 |
+| 캐시 콘텐츠가 `minContentVersion` 미만 | 캐시를 버리고 서버를 다시 읽는다. 오프라인이면 번들이 기준을 충족할 때만 번들, 아니면 점검 화면 |
+| 캐시 콘텐츠 자체의 나이 | 만료로 막지 않는다 (검수된 문구는 시간이 지나도 유효). 마지막 서버 확인이 7일을 넘으면 "마지막 확인: N일 전"을 표시 |
+
+이 정책은 "근거가 확인되지 않은 내용을 내보내지 않는다"는 원칙에 맞춰, 판단 근거가 없을 때 **가장 보수적인(빌드 시 검증된) 콘텐츠로 후퇴**하거나 차단한다.
 
 ---
 
@@ -285,16 +310,35 @@ PRD 6-1 샘플 대비 변경점: `source` 문자열 → `sources` ID 배열과 `
   "published": true,
   "review": { "status": "pending", "reviewer": "송수민", "reviewedAt": null },
   "steps": [
+    { "order": 1, "title": "피부 준비",
+      "body": "땀과 오염을 씻고 말리세요. 체모는 제거하고, 상처는 거즈로 덮으세요. 붙이는 동안 움직이지 마세요.",
+      "tension": "없음", "sources": ["S3"], "tape": [] },
     { "order": 2, "title": "앵커",
       "body": "종아리 근육 바로 아래쪽에 테이프를 2~3줄 둘러 시작점을 고정하세요.",
       "tension": "당기지 않음", "sources": ["S3", "S5"],
-      "tape": [[[80, 96], [130, 96]]] }
+      "tape": [[[80, 96], [130, 96]]] },
+    { "order": 3, "title": "스터럽",
+      "body": "발 안쪽에서 발뒤꿈치 아래를 지나 바깥쪽으로 U자로 붙여 인대를 지지하세요. 총 3줄을 붙입니다.",
+      "tension": "약하게", "sources": ["S3", "S5"],
+      "tape": [[[82, 96], [82, 150], [86, 190], [105, 206], [124, 190], [128, 150], [128, 96]]] },
+    { "order": 4, "title": "호스슈",
+      "body": "스터럽을 고정하는 용도로 말발굽 모양으로 붙여 발목이 좌우로 흔들리지 않게 하세요. (붙이는 위치는 송수민 검수 예정)",
+      "tension": "약하게", "sources": ["S3"],
+      "tape": [[[128, 150], [112, 178], [96, 186], [82, 160]]] },
+    { "order": 5, "title": "마무리 확인",
+      "body": "앤드로 끝맺고, 조이거나 아프면 떼고 다시 붙이세요. 피부가 창백하거나 테이프가 파고들면 너무 강한 것입니다.",
+      "tension": "당기지 않음", "sources": ["S3"],
+      "tape": [[[80, 90], [130, 90]], [[80, 102], [130, 102]]] }
   ],
   "cautions": [
-    { "text": "골절·탈구가 의심되면 테이핑만 믿고 움직이지 마세요.", "sources": ["S3"] }
+    { "text": "조이거나 아프면 다시 붙이고, 붙인 테이프 위에 덧붙이지 말고, 구김 없이 붙이세요.", "sources": ["S3"] },
+    { "text": "골절·탈구가 의심되면 테이핑만 믿고 움직이지 마세요.", "sources": ["S3"] },
+    { "text": "붓기·멍이 심하거나 체중을 실을 수 없으면 테이핑 전에 전문의 진료를 받으세요.", "sources": ["S6"] }
   ]
 }
 ```
+
+위 예시는 5단계 전체이며 주의사항은 지면상 3건만 싣는다 (전체 6건은 `content/guides.json`). 이 예시의 단계 5개가 6.2절 규칙을 모두 통과해야 하며, 이를 T-01·T-25가 검증한다.
 
 ### 5.3 도메인 모델 (Dart)
 
@@ -326,11 +370,17 @@ service cloud.firestore {
     match /users/{uid}/favorites/{symptomId} {
       allow read, delete: if request.auth != null && request.auth.uid == uid;
       allow create, update: if request.auth != null && request.auth.uid == uid
-        && request.resource.data.keys().hasOnly(['createdAt']);
+        && symptomId.matches('^[a-z0-9_]{1,64}$')
+        && request.resource.data.keys().hasOnly(['createdAt'])
+        && request.resource.data.createdAt == request.time;
     }
   }
 }
 ```
+
+즐겨찾기 payload는 필드 이름뿐 아니라 **값 형식**도 검사한다: 문서 ID는 소문자·숫자·밑줄 64자 이내, `createdAt`은 서버 시각(`FieldValue.serverTimestamp()`)이어야 한다. 앱이 서버 타임스탬프로만 쓰므로 정상 동작에는 영향이 없다.
+
+**조회와 규칙의 호환**: 규칙은 문서의 `published == true`를 요구하므로, 목록 조회는 규칙을 만족하는 쿼리여야 한다. Repository는 가이드를 **`collection('guides').where('published', isEqualTo: true)`로만 조회**한다 (조건 없는 전체 조회는 거부되므로 사용하지 않는다). 이는 T-15·T-10b로 검증한다.
 
 ### 5.5 오프라인 정책
 
@@ -339,6 +389,7 @@ service cloud.firestore {
 | 모바일 | Firestore 오프라인 캐시를 사용한다. 한 번 읽은 가이드는 오프라인에서도 열린다 |
 | 웹 | 영속 캐시를 명시적으로 켠다. 지원되지 않는 브라우저는 번들 폴백을 쓴다 |
 | 첫 실행이 오프라인 | 앱에 포함한 최소 데이터(`assets/fallback/guides.json`, 발목 가이드 1건)로 동작한다. 이 데이터는 업로드 전에 Git 원본에서 복사한다 |
+| 오래된 캐시·설정 조회 실패 | 4.1절 정책을 따른다 (버전 비교, 번들로 후퇴, 점검 화면) |
 | 즐겨찾기 오프라인 | 로컬에 쌓았다가 온라인이 되면 Firestore가 동기화한다 |
 
 ---
@@ -355,20 +406,22 @@ service cloud.firestore {
 | `Future<Symptom> getSymptom(String id)` | 증상 ID | `Symptom` | `GuideNotFoundException` |
 | `Stream<Set<String>> watchFavorites()` | 없음 | 즐겨찾기 증상 ID 집합 | 빈 집합 |
 | `Future<void> toggleFavorite(String id)` | 증상 ID | 없음 | `StorageException` |
-| `Future<AppConfig> getConfig()` | 없음 | `AppConfig{ guidesEnabled, minContentVersion }` | 마지막 성공 값, 없으면 기본값 |
+| `Future<AppConfig> getConfig()` | 없음 | `AppConfig{ guidesEnabled, minContentVersion, fetchedAt, isStale }` | 4.1절 정책 (24시간 내 마지막 성공 값, 마지막 값이 `false`면 유지, 그 외는 "상태 미확인"=번들만 허용) |
 | `void logEvent(AppEvent e)` | 이벤트 | 없음 | 무시 (기능에 영향 없음) |
 
 ### 6.2 문서 필드 규칙 (검증 기준)
 
 | 객체 | 필수 | 조건 |
 |---|---|---|
-| Symptom(`guides/{id}`) | `bodyPartId`, `name`, `tape`, `tapeNeeded`, `sources`(1개 이상), `published`, `review.status`, `steps`(1개 이상), `cautions`(1개 이상) | `review.status=verified`이면 `reviewedAt` 필수 |
-| TapeStep | `order`, `title`, `body`, `tension`, `sources` | `tape`는 선택 (없으면 그림 없이 문구만) |
+| Symptom(`guides/{id}`) | `bodyPartId`, `name`, `tape`, `tapeNeeded`, `sources`(1개 이상, 중복 없음), `published`, `review.status`, `steps`, `cautions`(1개 이상) | `bodyPartId`는 `bodyParts`에 존재. `review.status=verified`이면 `reviewedAt` 필수 |
+| steps 배열 | 발목 MVP는 **정확히 5개** (피부 준비 → 앵커 → 스터럽 → 호스슈 → 마무리 확인) | `order`는 1부터 N까지 **연속·중복 없음**. 배열 순서가 달라도 앱은 `order`로 정렬하되, 누락·중복·0 이하는 증상 전체를 제외한다. 단계 수는 증상별 `expectedSteps`(콘텐츠 검증 스크립트의 설정)와 일치해야 한다 |
+| TapeStep | `order`, `title`, `body`, `tension`, `sources`(1개 이상) | `tape`는 선택. 있으면 각 줄은 점 2개 이상, 점은 `[x, y]` 숫자 쌍이며 **x 0~210, y 0~230 범위**. 위반 시 그림만 생략(7장) |
 | Reference | `type`, `title` | `url`은 선택 |
-| 공통 | 모든 `sources`의 ID는 `references`에 존재해야 한다 | 위반 시 해당 증상 제외 (FR-08) |
-| Remote Config | `guidesEnabled`(bool), `minContentVersion`(string) | 앱이 가진 `contentVersion`이 더 낮으면 점검 안내 |
+| 참조 무결성 | 모든 `sources`(증상·단계·주의사항)의 ID는 `references`에 존재 | 위반 시 해당 증상 제외 (FR-08) |
+| 버전 | `meta/app.contentVersion`, Remote Config `minContentVersion` | `연.월.일련번호` 형식, 비교는 4.1절 |
+| Remote Config | `guidesEnabled`(bool), `minContentVersion`(string) | 콘텐츠 버전이 더 낮으면 점검 안내 |
 
-같은 규칙을 **세 곳**에서 확인한다: 콘텐츠 업로드 전 검증 스크립트(`tool/validate_content.mjs`, 업로드 스크립트가 먼저 실행), 앱의 `GuideValidator`, 보안 규칙(쓰기 차단·미게시 차단). 앞의 둘은 데이터 품질, 마지막은 접근 제어를 맡는다.
+같은 규칙을 **세 곳**에서 확인한다: 콘텐츠 업로드 전 검증 스크립트(`tool/validate_content.mjs`, 업로드 스크립트가 먼저 실행), 앱의 `GuideValidator`, 보안 규칙(쓰기 차단·미게시 차단). 앞의 둘은 데이터 품질, 마지막은 접근 제어를 맡는다. **스크립트와 Validator가 같은 규칙을 다르게 구현하지 않도록**, 잘못된 데이터 사례(`test/fixtures/invalid_cases.json`: 출처 누락, 끊어진 참조, 단계 중복·누락·순서 오류, 좌표 범위 밖, 잘못된 버전 형식)를 두 구현이 **모두 거부**하는지 같은 파일로 테스트한다 (T-25).
 
 ### 6.3 Analytics 이벤트 약속 (FR-11)
 
@@ -382,6 +435,8 @@ service cloud.firestore {
 
 파라미터에는 증상 ID와 단계 번호만 넣고 개인정보는 넣지 않는다. 완료율 = `guide_complete` ÷ `guide_start`이며, PRD의 직접 관찰 테스트를 대체하지 않고 보조한다.
 
+**중복 방지**: `guide_start`·`safety_pass`·`guide_complete`는 가이드 진행 1회(시작~완료)에 **최대 1번**만 보낸다. 앱 메모리의 진행 플래그로 판단하며(저장·식별자 없음), 완료 화면 재진입·뒤로 가기·화면 회전으로 다시 그려져도 재전송하지 않는다. 새로 시작하면 플래그를 초기화한다. 완료율 분모(`guide_start`)도 같은 방식이라 100%를 넘지 않는다 (T-29).
+
 ---
 
 ## 7. 오류 처리
@@ -394,8 +449,9 @@ service cloud.firestore {
 | 서버·캐시·번들 모두 실패 | 로딩 중단, 재시도 버튼 | "가이드를 불러오지 못했어요. 다시 시도해 주세요." |
 | 출처·검수 필드 누락 증상 | 해당 증상만 제외, 사유 기록 | (표시 없음) |
 | 제외 후 남은 증상 없음 | 빈 화면 대신 안내 | "현재 제공 가능한 가이드가 없습니다." |
-| `guidesEnabled=false` 또는 앱 콘텐츠 버전이 `minContentVersion`보다 낮음 | 가이드 진입 차단 | "현재 가이드를 점검 중입니다." |
-| Remote Config 조회 실패 | 마지막 성공 값 사용, 없으면 `true` | 없음 |
+| `guidesEnabled=false` 또는 사용할 수 있는 콘텐츠 버전이 `minContentVersion`보다 낮음 | 가이드 진입 차단 | "현재 가이드를 점검 중입니다." |
+| Remote Config 조회 실패 | 4.1절: 24시간 내 마지막 값 사용, 마지막 값이 `false`면 차단 유지, 그 외 "상태 미확인"이면 번들 콘텐츠만 허용 | "최신 상태를 확인하지 못했어요." (상태 미확인일 때만) |
+| 단계 수·순서 위반(누락·중복·역순) | 해당 증상 전체 제외 | (표시 없음) |
 | 안전 체크 미완료 | 시작 버튼 비활성, 미체크 항목 강조 | "모든 주의사항을 확인해 주세요." |
 | 없는 증상 ID / 잘못된 경로 | 홈으로 이동 | "찾을 수 없는 가이드입니다." |
 | 익명 로그인 실패 | 즐겨찾기만 비활성, 가이드는 정상 | "즐겨찾기를 지금은 사용할 수 없어요." |
@@ -437,6 +493,25 @@ Firebase 로컬 에뮬레이터(Firestore, Auth)로 규칙과 저장소 동작�
 | T-22 | 사용량 확인: 한 번의 전체 흐름에서 Firestore 읽기 횟수 | NFR-03 | 수동(콘솔) | 시작 시 `meta/app` 1회 + 필요 시 갱신 |
 | T-23 | PRD 5장 "화면별 완료 조건" 점검 | FR-01~05 | 수동 | 각 시점 통과 |
 | T-24 | `flutter analyze`, `flutter test`, 규칙 테스트가 통과한다 | 전체 | 로컬 실행 | 제출·시연 전 전부 성공 |
+| T-10b | 가이드 목록 조회가 `published == true` 쿼리로 실행되어 규칙에 거부되지 않는다 (조건 없는 조회는 거부됨을 함께 확인) | FR-08 | 통합(에뮬레이터) | 쿼리 성공, 무조건 조회 거부 |
+| T-25 | 잘못된 데이터 사례(`test/fixtures/invalid_cases.json`: 출처 누락, 끊어진 참조, 단계 중복·누락·역순, 좌표 범위 밖, 버전 형식 오류)를 검증 스크립트와 앱 Validator가 **모두** 거부한다 | FR-08 | 단위+스크립트 | 같은 파일에 대해 두 구현이 모두 거부 |
+| T-26 | 버전 비교: `2026.11.10 > 2026.11.2`, 형식 오류는 거부 | FR-10 | 단위 | 숫자 비교가 맞음 |
+| T-27 | 설정 조회 실패: 24시간 내 마지막 값 사용 / 마지막 값 `false`면 차단 유지 / 값 없음이면 번들 콘텐츠만 허용 | FR-10, 4.1 | 단위+위젯 | 표와 같은 동작 |
+| T-28 | 오래된 캐시(`minContentVersion` 미만)는 버려지고, 오프라인이면 번들 또는 점검 화면이 나온다. 오프라인 첫 실행은 번들로 동작한다 | NFR-01, 4.1 | 통합(에뮬레이터)+위젯 | 오래된 콘텐츠가 표시되지 않음 |
+| T-29 | `guide_start`·`guide_complete`가 한 진행당 1번만 전송된다 (재진입·뒤로 가기에도) | FR-11 | 단위 | 이벤트 횟수 1 |
+| T-30 | 규칙: 즐겨찾기 `createdAt`이 서버 시각이 아니거나 문서 ID 형식이 틀리면 거부된다 | NFR-04, NFR-06 | 규칙 테스트 | 거부 |
+
+### 8.1 실행 결과 기록
+
+위 계획은 **설계이며, 아래 표가 채워지기 전까지 통과로 간주하지 않는다.** 실행할 때마다 날짜·환경·결과를 기록한다.
+
+| 범위 | 대상 테스트 | 실행일 | 환경 | 결과 |
+|---|---|---|---|---|
+| 규칙 테스트 | T-14~T-16, T-30 | (미실행) | Firebase 에뮬레이터 | — |
+| 단위·위젯 | T-01~T-09, T-11, T-12, T-17, T-18, T-25~T-27, T-29 | (미실행) | `flutter test` | — |
+| 통합 | T-10, T-10b, T-13, T-28 | (미실행) | 에뮬레이터 | — |
+| 수동 | T-20~T-23 | (미실행) | 실기기 | — |
+| 사용자 테스트 | PRD 5-1 | (미실행) | 초보자 관찰 | — |
 
 사용자 테스트(완료율 80%, 이해도 4점, 안전 3문항 전원 정답 등)는 제품 검증으로, PRD 5-1에 따라 별도 진행한다.
 
@@ -447,16 +522,16 @@ Firebase 로컬 에뮬레이터(Firestore, Auth)로 규칙과 저장소 동작�
 | PRD 문제 | 요구사항 | 설계 | 구현 | 테스트 |
 |---|---|---|---|---|
 | 어떤 자료가 맞는지 판단하기 어렵다 | FR-06 출처·검수 표시 | 5.1, 6.2 | `guide/widgets/source_badge.dart` | T-07, T-09 |
-| 〃 | FR-08 근거 없는 가이드 차단 | 4장 4단계, 5.4, 6.2 | `core/validation.dart`, `firestore.rules`, `tool/validate_content.mjs` | T-02, T-03, T-04, T-15, T-19 |
+| 〃 | FR-08 근거 없는 가이드 차단 | 4장 4단계, 5.4, 6.2 | `core/validation.dart`, `firestore.rules`, `tool/validate_content.mjs` | T-02, T-03, T-04, T-15, T-19, T-25 |
 | 〃 | FR-09 검수 전 보수적 문구 | 5.1 `review` | `content/guides.json`, `source_badge.dart` | T-12 |
 | 방법을 몰라 포기한다 | FR-01, FR-03 | 3.3 | `symptom_select_screen.dart`, `step_guide_screen.dart`, `tape_diagram.dart` | T-01, T-05, T-07, T-23 |
 | 제대로 붙였는지 불안하다 | FR-04 마무리 확인 | 3.3 | `complete_screen.dart` | T-08 |
 | 잘못 붙이면 피부·혈액순환 문제 | FR-02 안전 체크 게이트 | 4장 6단계 | `safety_check_screen.dart`, `guide_session_provider.dart` | T-06 |
-| 〃 | FR-10 원격 중단 스위치 | 2.2 Remote Config | `config_service.dart` | T-17 |
+| 〃 | FR-10 원격 중단 스위치 | 2.2 Remote Config | `config_service.dart` | T-17, T-26, T-27 |
 | 의학 치료로 오해할 수 있다 | FR-07 면책 문구 | 5.1 `meta/app` | 공통 위젯 | T-09 |
 | 다시 찾기 번거롭다 | FR-05 즐겨찾기 | 5.1, 5.4 | `favorite_repository.dart`, `auth_service.dart`, `favorites_screen.dart` | T-10, T-16 |
-| 성공 기준(완료율) 측정 | FR-11 | 6.3 | `analytics_service.dart` | T-18 |
-| 운동·부상 현장에서 쓴다 | NFR-01, NFR-02 | 5.5 | `firestore_guide_repository.dart`, `assets/fallback/guides.json` | T-11, T-20, T-21 |
+| 성공 기준(완료율) 측정 | FR-11 | 6.3 | `analytics_service.dart` | T-18, T-29 |
+| 운동·부상 현장에서 쓴다 | NFR-01, NFR-02 | 5.5 | `firestore_guide_repository.dart`, `assets/fallback/guides.json` | T-11, T-20, T-21, T-28 |
 | 비용·개인정보 | NFR-03, NFR-04 | 2.4, 5.4 | Firebase 설정, 이벤트 정의 | T-16, T-18, T-22 |
 | 콘텐츠 확장·검수 반영 | NFR-05, NFR-06 | 3.2, 5.1, 5.4 | `tool/seed/`, `firestore.rules` | T-13, T-14 |
 | 오류 시 안전하게 실패 | 7장 전체 | 7장 | `core/validation.dart`, 전역 핸들러 | T-11, T-17 |
@@ -511,7 +586,8 @@ TapeFit/
 │  ├─ validate_content.mjs               # 업로드 전 콘텐츠 검증 (6.2절 규칙)
 │  └─ seed/seed.mjs                      # Admin SDK로 Firestore 업로드 (서비스 계정 키는 저장소에 올리지 않음)
 ├─ test/
-│  ├─ validation_test.dart               # T-01~T-04, T-12
+│  ├─ validation_test.dart               # T-01~T-04, T-12, T-25(Dart), T-26
+│  ├─ fixtures/invalid_cases.json            # 잘못된 데이터 사례 (스크립트와 앱이 같은 파일로 테스트)
 │  ├─ safety_check_test.dart             # T-06
 │  ├─ flow_test.dart                     # T-05, T-07~T-09, T-17
 │  ├─ repository_test.dart               # T-10, T-11, T-13 (에뮬레이터)

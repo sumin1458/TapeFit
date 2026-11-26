@@ -11,7 +11,9 @@ service cloud.firestore {
     match /users/{uid}/favorites/{symptomId} {
       allow read, delete: if request.auth != null && request.auth.uid == uid;
       allow create, update: if request.auth != null && request.auth.uid == uid
-        && request.resource.data.keys().hasOnly(['createdAt']);
+        && symptomId.matches('^[a-z0-9_]{1,64}$')
+        && request.resource.data.keys().hasOnly(['createdAt'])
+        && request.resource.data.createdAt == request.time;
     }
   }
 }
