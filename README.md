@@ -2,10 +2,13 @@
 
 초보자를 위한 단계별 테이핑 가이드 앱 (Flutter + Firebase). 요구사항은 `docs/PRD.md`, 설계는 `docs/TRD.md`.
 
+**웹 시연**: https://sumin1458.github.io/TapeFit/ (`main`에 push하면 GitHub Actions가 테스트 후 자동 배포, 실행 기록은 저장소 Actions 탭)
+
 ## 심사 참고 파일 (코드 외)
 
 | 구분 | 파일 |
 |---|---|
+| 테스트 실행 기록 | [lib/test_report.dart](lib/test_report.dart), [.github/workflows/deploy.yml](.github/workflows/deploy.yml) |
 | 요구사항 (PRD) | [docs/PRD.md](docs/PRD.md) |
 | 기술 설계·테스트 결과 (TRD) | [docs/TRD.md](docs/TRD.md) |
 | 콘텐츠 데이터 (5단계·출처·검수 상태) | [content/guides.json](content/guides.json), [assets/fallback/guides.json](assets/fallback/guides.json) |

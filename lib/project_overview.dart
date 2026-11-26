@@ -14,7 +14,9 @@
 /// flutter build web --release                   # 웹 빌드 (build/web, 정적 서버로 시연)
 /// ```
 /// 실행 결과(실제 측정): flutter test 42/42 통과, node --test 19/19 통과,
-/// flutter analyze 오류 0건. 배포 주소는 아직 없다(Firebase Hosting 미배포).
+/// flutter analyze 오류 0건. 전체 출력은 `lib/test_report.dart`.
+/// 웹 시연: https://sumin1458.github.io/TapeFit/ (GitHub Actions가 테스트 후 자동 배포,
+/// `.github/workflows/deploy.yml`).
 ///
 /// ## 테스트가 읽는 파일 (모두 저장소에 있음)
 /// - `content/guides.json`: 가이드 콘텐츠 원본 (T-35, T-49가 읽음)
