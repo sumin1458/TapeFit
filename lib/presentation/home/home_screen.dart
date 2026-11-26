@@ -73,9 +73,31 @@ class HomeScreen extends ConsumerWidget {
               Text('추천 가이드', style: Theme.of(context).textTheme.titleLarge),
               const SizedBox(height: 6),
               for (final s in symptoms) _SymptomCard(symptom: s),
+              const SizedBox(height: 12),
+              const _QrCard(),
             ],
           );
         },
+      ),
+    );
+  }
+}
+
+class _QrCard extends StatelessWidget {
+  const _QrCard();
+
+  @override
+  Widget build(BuildContext context) {
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(children: [
+          Text('QR로 앱 열기', style: Theme.of(context).textTheme.titleMedium),
+          const SizedBox(height: 4),
+          const Text('휴대폰 카메라로 스캔하세요.', style: TextStyle(fontSize: 12, color: Colors.black54)),
+          const SizedBox(height: 8),
+          Image.asset('assets/images/qr.png', width: 160, height: 160),
+        ]),
       ),
     );
   }
