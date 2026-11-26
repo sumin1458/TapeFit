@@ -1,0 +1,15 @@
+.dart_tool/
+.packages
+build/
+.flutter-plugins
+.flutter-plugins-dependencies
+pubspec.lock
+node_modules/
+.env
+.env.*
+*serviceAccount*.json
+service-account*.json
+.firebase/
+firebase-debug.log
+.idea/
+.vscode/

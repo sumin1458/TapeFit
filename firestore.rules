@@ -1,0 +1,17 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{db}/documents {
+    match /meta/{id}       { allow read: if true; allow write: if false; }
+    match /bodyParts/{id}  { allow read: if true; allow write: if false; }
+    match /references/{id} { allow read: if true; allow write: if false; }
+    match /guides/{id} {
+      allow read: if resource.data.published == true;
+      allow write: if false;
+    }
+    match /users/{uid}/favorites/{symptomId} {
+      allow read, delete: if request.auth != null && request.auth.uid == uid;
+      allow create, update: if request.auth != null && request.auth.uid == uid
+        && request.resource.data.keys().hasOnly(['createdAt']);
+    }
+  }
+}
