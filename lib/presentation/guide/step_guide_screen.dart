@@ -69,6 +69,8 @@ class _StepGuideScreenState extends ConsumerState<StepGuideScreen> {
         const SizedBox(height: 8),
         Chip(label: Text('당김 강도: ${step.tension}')),
         const SizedBox(height: 4),
+        SourceLine(sources: step.sources, references: refs),
+        const SizedBox(height: 4),
         ReviewBadge(review: s.review),
         const Divider(height: 32),
         ExpansionTile(
@@ -80,6 +82,7 @@ class _StepGuideScreenState extends ConsumerState<StepGuideScreen> {
               ListTile(
                 dense: true,
                 title: Text(c.text),
+                subtitle: SourceLine(sources: c.sources, references: refs),
               ),
           ],
         ),

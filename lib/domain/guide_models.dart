@@ -34,7 +34,7 @@ class Review {
     );
   }
 
-  String get label => verified ? '검수 완료 ($reviewedAt)' : '$reviewer 검수 전';
+  String get label => verified ? '검수 완료 ($reviewedAt)' : '검수 예정';
 }
 
 List<String> _strings(dynamic v) => (v as List? ?? const []).map((e) => e.toString()).toList();

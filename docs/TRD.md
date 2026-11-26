@@ -87,6 +87,25 @@
 | 근거 | GitHub PR #9(TRD 초안·개정), #11(번들 JSON 안 검토), #12(Firebase 안 복원) 이력 |
 | 승인 방식 | 저장소 관리와 PR 병합은 결정자 1인이 맡고, 팀원은 GitHub를 쓰지 않으므로 PR 승인 기록 대신 위 결정 이력을 근거로 한다 |
 
+### 1.5 구현 현황 (2026-11-27 기준)
+
+문서(설계)와 코드(구현)의 차이를 숨기지 않기 위해 구현 범위를 아래에 명시한다.
+
+| 영역 | 상태 | 근거 |
+|---|---|---|
+| 증상 선택 → 안전 체크 → 단계 가이드 → 완료 흐름 | 구현됨 (웹 실행 확인) | `lib/presentation/*`, 8.1 |
+| 테이프 도식, 주의사항, 즐겨찾기(메모리) | 구현됨 | `tape_diagram.dart`, `guide_providers.dart` |
+| 출처 목록(글자 링크)과 검수 상태 배지 표시 | 구현됨 (단계·주의사항 아래, 링크 없는 출처는 설명만) | `source_badge.dart`, T-31 |
+| 콘텐츠 검증(13개 오류 코드, Dart·Node 동일 규칙) | 구현됨 | `validation.dart`, `validate_content.mjs`, T-25 |
+| 번들 JSON 폴백, 원격 실패 시 폴백 | 구현됨 | `fallback_guide_source.dart` |
+| Firestore 연결 | 코드는 있으나 Firebase 프로젝트 미설정(실서버 검증 안 함) | `firebase_options.dart`는 자리표시자 |
+| 시작 초기화 흐름(4.1), 설정 정책(`config_service`) | **이번 범위 제외**, 후속 구현 | 11.1 P0-5 |
+| 즐겨찾기 영구 저장(Firestore) | **이번 범위 제외**, 현재는 메모리 저장 | 11.1 |
+| Analytics 이벤트(6.3), 점검 화면, 런타임 오류 코드(`NO_GUIDES`, `LOAD_FAILED` 등) | **이번 범위 제외**, 현재는 화면 안내 문구로 처리 | 11.1 |
+| Android/iOS 실행 | 미검증 (SDK 미설치), 웹으로만 실행 확인 | 8.2 |
+
+UI는 파란 테마·둥근 카드·홈 부위 그리드·하단 탭으로 구성하며, 시안의 AR·3D·음성 기능은 PRD 범위 밖이라 넣지 않았다.
+
 ---
 
 ## 2. 기술 스택과 Firebase 구성
@@ -597,7 +616,10 @@ Firebase 로컬 에뮬레이터(Firestore, Auth)로 규칙과 저장소 동작�
 | T-28 | 오래된 캐시(`minContentVersion` 미만)는 버려지고, 오프라인이면 번들 또는 점검 화면이 나온다. 오프라인 첫 실행은 번들로 동작한다 | NFR-01, 4.1 | 통합(에뮬레이터)+위젯 | 오래된 콘텐츠가 표시되지 않음 |
 | T-29 | `guide_start`·`guide_complete`가 한 진행당 1번만 전송된다 (재진입·뒤로 가기에도) | FR-11 | 단위 | 이벤트 횟수 1 |
 | T-30 | 규칙: 즐겨찾기 `createdAt`이 서버 시각이 아니거나 문서 ID 형식이 틀리면 거부된다 | NFR-04, NFR-06 | 규칙 테스트 | 거부 |
-
+| T-31 | 단계 가이드 화면에 출처 링크와 검수 상태가 표시된다 | FR-05, FR-08 | 위젯 | "출처 ·" 문구와 "검수 예정" 표시 |
+| T-32 | 가이드 로드 실패 시 안내 문구와 다시 시도 버튼이 나온다 | NFR-02 | 위젯 | 문구·버튼 표시 |
+| T-33 | 없는 가이드 ID로 접근하면 "찾을 수 없어요" 안내가 나온다 | NFR-02 | 위젯 | 안내 표시 |
+| T-34 | 홈에 면책 문구가 보이고 준비 중 부위가 표시된다 | FR-07 | 위젯 | 문구 표시 |
 ### 8.1 실행 결과 기록
 
 위 계획은 **설계이며, 아래 표가 채워지기 전까지 통과로 간주하지 않는다.** 실행할 때마다 날짜·환경·결과를 기록한다.
@@ -606,7 +628,9 @@ Firebase 로컬 에뮬레이터(Firestore, Auth)로 규칙과 저장소 동작�
 |---|---|---|---|---|
 | 규칙 테스트 | T-14~T-16, T-30 | (미실행) | Firebase 에뮬레이터 | — |
 | 콘텐츠 검증 스크립트 | `tool/validate_content.mjs` (T-25의 Node 쪽) | 2026-11-27 | Node v26.13.1, Windows | 통과 ("콘텐츠 검증 통과") |
-| 정적 분석 | 전체 코드 | 2026-11-27 | Flutter 3.50.1 / Dart 3.14.0, `flutter analyze` | 오류 0건, 안내(info) 10건 (8.3 참고) |
+| 정적 분석 | 전체 코드 | 2026-11-27 | Flutter 3.50.1 / Dart 3.14.0, `flutter analyze` | 오류 0건, 안내(info) 13건 (8.3 참고) |
+| 위젯 (화면) | `test/widget_screens_test.dart` 4건: T-31~T-34 | 2026-11-27 | `flutter test` | 4건 모두 통과 (전체 `flutter test` 27건 통과) |
+| 웹 빌드·수동 확인 | `flutter build web --release` 후 브라우저에서 홈·단계 가이드 확인 | 2026-11-27 | Flutter 3.50.1, Windows, 로컬 웹 서버 | 빌드 성공, 출처 링크·검수 배지·인체 아이콘 표시 확인 (실기기 아님) |
 | 단위 (최초 실행) | `test/validation_test.dart` 4건: 콘텐츠 원본 검증 통과, 발목 5단계·출처, 없는 출처 참조 오류, `published=false` 제외 | 2026-11-27 | `flutter test` | 4건 모두 통과 |
 | 단위 T-25 (Dart) | `test/validation_test.dart` 23건: 위 4건 + 버전 비교 + 잘못된 데이터 18건이 기대한 오류 코드로 거부됨 | 2026-11-27 | `flutter test` | 23건 모두 통과 |
 | 스크립트 T-25 (Node) | `tool/validate_content.test.mjs` 19건: 원본 통과 + 같은 잘못된 데이터 18건 거부 | 2026-11-27 | `node --test tool/validate_content.test.mjs` | 19건 모두 통과 |
@@ -619,7 +643,7 @@ Firebase 로컬 에뮬레이터(Firestore, Auth)로 규칙과 저장소 동작�
 
 ### 8.2 핵심 검증 절차 (실행 방법과 합격 기준)
 
-2026-11-27에 Flutter 3.50.1과 Node v26.13.1을 설치해 `flutter pub get`, `flutter analyze`, `flutter test`, `node tool/validate_content.mjs`를 실행했다(8.1). Firebase CLI는 아직 설치하지 않았고 앱 실행(`flutter run`)과 에뮬레이터 검증도 하지 않았다. 아래는 나머지 항목의 실행 절차이며, 결과는 8.1과 8.3에 기록한다.
+2026-11-27에 Flutter 3.50.1과 Node v26.13.1을 설치해 `flutter pub get`, `flutter analyze`, `flutter test`, `node tool/validate_content.mjs`를 실행했다(8.1). 이후 웹 빌드(`flutter build web --release`)로 앱을 실행해 화면을 확인했다(8.1). Firebase CLI는 아직 설치하지 않았고 Android/iOS 실행과 에뮬레이터 검증은 하지 않았다. 아래는 나머지 항목의 실행 절차이며, 결과는 8.1과 8.3에 기록한다.
 
 | 대상 | 준비 | 절차 | 합격 기준 | 실패 시 |
 |---|---|---|---|---|
@@ -636,7 +660,7 @@ Firebase 로컬 에뮬레이터(Firestore, Auth)로 규칙과 저장소 동작�
 
 | 날짜 | 테스트 ID | 실패 내용 | 원인 | 수정 (커밋/PR) | 재실행 결과 |
 |---|---|---|---|---|---|
-| 2026-11-27 | 정적 분석 | `package:flutter/material.dart` 사용 중단 안내 9건 (`deprecated_member_use`) | 설치한 Flutter 3.50.1에서 해당 import가 `material_ui`로 이전 예정으로 표시됨. 동작에는 영향 없음 | 미수정 (후속 정리 대상) | 오류 0건 |
+| 2026-11-27 | 정적 분석 | `package:flutter/material.dart` 사용 중단 안내 11건 (`deprecated_member_use`), `prefer_const_constructors` 1건 추가 (UI 변경 후 총 13건) | 설치한 Flutter 3.50.1에서 해당 import가 `material_ui`로 이전 예정으로 표시됨. 동작에는 영향 없음 | 미수정 (후속 정리 대상) | 오류 0건 |
 | 2026-11-27 | 정적 분석 | `lib/domain/guide_models.dart`의 `prefer_null_aware_operators` 안내 1건 | `null` 비교를 `?.`로 쓰라는 권장 | 미수정 (후속 정리 대상) | 오류 0건 |
 
 ---
